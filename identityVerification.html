@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ticketmaster SG - Identity Verification</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background-color: #888;
+      color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .verification-card {
+      background-color: #fff;
+      width: 400px;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+    .card-header {
+      background-color: #0071ce;
+      padding: 15px;
+      color: #fff;
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+    }
+    .card-body { padding: 20px; text-align: center; }
+    .card-body h1 { font-size: 22px; margin-bottom: 20px; color: #333; }
+    #camera-container {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      aspect-ratio: 16/9;
+      width: 100%;
+      max-width: 360px;
+      margin: 0 auto 20px;
+      border: 3px solid #0071ce;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    /* Mirror live view */
+    #video,
+    #overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+    .gradient-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background: radial-gradient(ellipse 100px 150px at center, transparent 98%, rgba(0,0,0,0.8) 100%);
+    }
+    .face-outline {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 200px;
+      height: 300px;
+      transform: translate(-50%, -50%);
+      border: 3px solid #fff;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    #prompt { margin-bottom: 15px; font-size: 18px; font-weight: 500; }
+    #verifyButton {
+      background-color: #0071ce;
+      color: #fff;
+      border: none;
+      padding: 12px;
+      width: 100%;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin-bottom: 15px;
+    }
+    #verifyButton:disabled { background-color: #ccc; cursor: not-allowed; }
+    #verifyButton:hover:not(:disabled) { background-color: #005c9e; }
+    #verificationResult { margin-top: 15px; display: none; }
+    #verificationResult p { margin-bottom: 15px; font-size: 18px; color: #0071ce; }
+    #verificationResult button {
+      background-color: #0071ce;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    #verificationResult button:hover { background-color: #005c9e; }
+    .back-to-verification {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #0071ce;
+      text-decoration: none;
+    }
+    .back-to-verification:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="verification-card">
+    <div class="card-header">ticketmaster</div>
+    <div class="card-body">
+      <h1>Identity Verification</h1>
+      <p>Please position your face within the frame below:</p>
+      <div id="camera-container">
+        <video id="video" autoplay muted playsinline></video>
+        <canvas id="overlay"></canvas>
+        <div class="gradient-overlay"></div>
+        <div class="face-outline"></div>
+      </div>
+      <div id="prompt">No face detected</div>
+      <button id="verifyButton" type="button" disabled onclick="verifyIdentity()">Verify Identity</button>
+      <div id="verificationResult">
+        <p>Verification complete!</p>
+        <button type="button" onclick="goToConfirmation()">Next</button>
+      </div>
+      <a href="verification.html" class="back-to-verification">Back to Verification</a>
+    </div>
+  </div>
+  <script>
+    let verified = false;
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('overlay');
+    const container = document.getElementById('camera-container');
+    const promptEl = document.getElementById('prompt');
+    const ctx = canvas.getContext('2d');
+    const tolerance = 50;
+    const verifyButton = document.getElementById('verifyButton');
+    let faceDetector;
+    let stream = null;
+    
+    if ('FaceDetector' in window) {
+      faceDetector = new FaceDetector({ fastMode: true, maxDetectedFaces: 1 });
+    } else {
+      promptEl.innerText = "Face detection not supported.";
+    }
+    
+    function startCamera() {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true })
+          .then(str => {
+            stream = str;
+            video.srcObject = stream;
+            video.play();
+          })
+          .catch(err => {
+            console.error("Camera error:", err);
+            promptEl.innerText = "Unable to access camera.";
+          });
+      } else {
+        promptEl.innerText = "Camera not supported.";
+      }
+      video.addEventListener('playing', () => {
+        const vw = video.videoWidth || 640;
+        const vh = video.videoHeight || 480;
+        canvas.width = vw;
+        canvas.height = vh;
+      });
+    }
+    
+    function stopCamera() {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        video.srcObject = null;
+        stream = null;
+      }
+    }
+    
+    function detectFaces() {
+      if (!faceDetector) return;
+      faceDetector.detect(video)
+        .then(faces => {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          if (faces.length > 0) {
+            const faceBox = faces[0].boundingBox;
+            ctx.strokeStyle = 'yellow';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(faceBox.left, faceBox.top, faceBox.width, faceBox.height);
+            const faceCenterX = faceBox.left + faceBox.width / 2;
+            const faceCenterY = faceBox.top + faceBox.height / 2;
+            const canvasCenterX = canvas.width / 2;
+            const canvasCenterY = canvas.height / 2;
+            const dx = canvasCenterX - faceCenterX;
+            const dy = canvasCenterY - faceCenterY;
+            const faceArea = faceBox.width * faceBox.height;
+            const canvasArea = canvas.width * canvas.height;
+            const areaRatio = faceArea / canvasArea;
+            let instruction = "";
+            if (Math.abs(dx) < tolerance && Math.abs(dy) < tolerance) {
+              if (areaRatio < 0.25) {
+                instruction = "Face centered but too small – move closer.";
+              } else if (areaRatio > 0.35) {
+                instruction = "Face centered but too big – move further.";
+              } else {
+                instruction = "Face centered!";
+              }
+            } else {
+              if (dx > tolerance) instruction += "Move right. ";
+              if (dx < -tolerance) instruction += "Move left. ";
+              if (dy > tolerance) instruction += "Move down. ";
+              if (dy < -tolerance) instruction += "Move up. ";
+            }
+            promptEl.innerText = instruction;
+            if (Math.abs(dx) < tolerance && Math.abs(dy) < tolerance &&
+                areaRatio >= 0.25 && areaRatio <= 0.35) {
+              verifyButton.disabled = false;
+            } else {
+              verifyButton.disabled = true;
+            }
+          } else {
+            promptEl.innerText = "No face detected";
+            verifyButton.disabled = true;
+          }
+        })
+        .catch(err => {
+          console.error("Face detection error:", err);
+          promptEl.innerText = "Error detecting face";
+          verifyButton.disabled = true;
+        })
+        .finally(() => {
+          requestAnimationFrame(detectFaces);
+        });
+    }
+    
+    function verifyIdentity() {
+      const originalColor = document.body.style.backgroundColor || '#888';
+      const flashInterval = setInterval(() => {
+        document.body.style.backgroundColor =
+          '#' + Math.floor(Math.random() * 16777215).toString(16);
+      }, 300);
+      setTimeout(() => {
+        clearInterval(flashInterval);
+        document.body.style.backgroundColor = originalColor;
+        document.getElementById('verificationResult').style.display = 'block';
+        verified = true;
+      }, 2000);
+    }
+    
+    function goToConfirmation() {
+      stopCamera();
+      window.location.href = "confirmation.html";
+    }
+    
+    startCamera();
+    requestAnimationFrame(detectFaces);
+  </script>
+</body>
+</html>

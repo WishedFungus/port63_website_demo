@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ticketmaster SG - View Ticket</title>
+  <style>
+    /* GLOBAL STYLES */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background-color: #888;
+      color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    /* Card common style */
+    .card {
+      background-color: #fff;
+      width: 400px;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      overflow: hidden;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .card-header {
+      background-color: #0071ce;
+      padding: 15px;
+      color: #fff;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .card-body { padding: 20px; }
+    /* Identity Verification Section */
+    #verificationSection { display: block; }
+    #camera-container {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      aspect-ratio: 16/9;
+      width: 100%;
+      max-width: 360px;
+      margin: 0 auto 20px;
+      border: 3px solid #0071ce;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    #video, #overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+    .gradient-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background: radial-gradient(ellipse 100px 150px at center, transparent 98%, rgba(0,0,0,0.8) 100%);
+    }
+    .face-outline {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 200px;
+      height: 300px;
+      transform: translate(-50%, -50%);
+      border: 3px solid #fff;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    #prompt { margin-bottom: 15px; font-size: 18px; font-weight: 500; }
+    #verifyButton {
+      background-color: #0071ce;
+      color: #fff;
+      border: none;
+      padding: 12px;
+      width: 100%;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin-bottom: 15px;
+    }
+    #verifyButton:disabled { background-color: #ccc; cursor: not-allowed; }
+    #verifyButton:hover:not(:disabled) { background-color: #005c9e; }
+    .back-to-dashboard {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #0071ce;
+      text-decoration: none;
+    }
+    .back-to-dashboard:hover { text-decoration: underline; }
+    /* Ticket Section (hidden until identity verified) */
+    #ticketSection { display: none; }
+    #qrContainer {
+      position: relative;
+      margin-bottom: 15px;
+    }
+    #qrCanvas {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      display: block;
+      margin: 0 auto;
+    }
+    .timer {
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+    .ticket-details {
+      text-align: left;
+      font-size: 16px;
+      margin-top: 15px;
+      padding: 0 10px;
+    }
+    .ticket-details p { margin: 5px 0; }
+    .back-btn {
+      background-color: #e5e5e5;
+      color: #0071ce;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 20px;
+      transition: background-color 0.3s;
+    }
+    .back-btn:hover { background-color: #ccc; }
+  </style>
+</head>
+<body>
+  <!-- Identity Verification Card -->
+  <div id="verificationSection" class="card">
+    <div class="card-header">ticketmaster</div>
+    <div class="card-body">
+      <h1>Identity Verification</h1>
+      <p>Please position your face within the frame below:</p>
+      <div id="camera-container">
+        <video id="video" autoplay muted playsinline></video>
+        <canvas id="overlay"></canvas>
+        <div class="gradient-overlay"></div>
+        <div class="face-outline"></div>
+      </div>
+      <div id="prompt">No face detected</div>
+      <button id="verifyButton" type="button" disabled onclick="verifyIdentity()">Verify Identity</button>
+      <!-- Updated Back button -->
+      <a href="dashboard.html#tab-my-tickets" class="back-to-dashboard">Back to My Tickets</a>
+    </div>
+  </div>
+
+  <!-- Ticket Card (hidden until identity verification succeeds) -->
+  <div id="ticketSection" class="card">
+    <div class="card-header">View Ticket</div>
+    <div class="card-body">
+      <div id="qrContainer">
+        <canvas id="qrCanvas" width="200" height="200"></canvas>
+      </div>
+      <div class="timer" id="countdownTimer">02:00</div>
+      <div class="ticket-details" id="ticketDetails">
+        <p><strong>Event:</strong> <span id="eventName">Demo Event</span></p>
+        <p><strong>Date:</strong> <span id="eventDate">01 Jan 2025</span></p>
+        <p><strong>Time:</strong> <span id="eventTime">8:00 PM</span></p>
+        <p><strong>Seat:</strong> <span id="seatSection">Section A</span></p>
+      </div>
+      <button class="back-btn" onclick="window.location.href='dashboard.html#tab-my-tickets'">Back to My Tickets</button>
+    </div>
+  </div>
+
+  <script>
+    /* ========== Identity Verification ========== */
+    const video = document.getElementById('video');
+    const overlay = document.getElementById('overlay');
+    const promptEl = document.getElementById('prompt');
+    const verifyButton = document.getElementById('verifyButton');
+    const verificationSection = document.getElementById('verificationSection');
+    const ticketSection = document.getElementById('ticketSection');
+    const ctx = overlay.getContext('2d');
+    const tolerance = 50;
+    let faceDetector;
+    let stream = null;
+    
+    if ('FaceDetector' in window) {
+      faceDetector = new FaceDetector({ fastMode: true, maxDetectedFaces: 1 });
+    } else {
+      promptEl.innerText = "Face detection not supported.";
+    }
+    
+    function startCamera() {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true })
+          .then(str => {
+            stream = str;
+            video.srcObject = stream;
+            video.play();
+          })
+          .catch(err => {
+            console.error("Camera error:", err);
+            promptEl.innerText = "Unable to access camera.";
+          });
+      } else {
+        promptEl.innerText = "Camera not supported.";
+      }
+      video.addEventListener('playing', () => {
+        const vw = video.videoWidth || 640;
+        const vh = video.videoHeight || 480;
+        overlay.width = vw;
+        overlay.height = vh;
+      });
+    }
+    
+    function stopCamera() {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        video.srcObject = null;
+        stream = null;
+      }
+    }
+    
+    function detectFaces() {
+      if (!faceDetector) return;
+      faceDetector.detect(video)
+        .then(faces => {
+          ctx.clearRect(0, 0, overlay.width, overlay.height);
+          if (faces.length > 0) {
+            const faceBox = faces[0].boundingBox;
+            ctx.strokeStyle = 'yellow';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(faceBox.left, faceBox.top, faceBox.width, faceBox.height);
+            const faceCenterX = faceBox.left + faceBox.width / 2;
+            const faceCenterY = faceBox.top + faceBox.height / 2;
+            const canvasCenterX = overlay.width / 2;
+            const canvasCenterY = overlay.height / 2;
+            const dx = canvasCenterX - faceCenterX;
+            const dy = canvasCenterY - faceCenterY;
+            const faceArea = faceBox.width * faceBox.height;
+            const canvasArea = overlay.width * overlay.height;
+            const areaRatio = faceArea / canvasArea;
+            let instruction = "";
+            if (Math.abs(dx) < tolerance && Math.abs(dy) < tolerance) {
+              if (areaRatio < 0.25) {
+                instruction = "Face centered but too small – move closer.";
+              } else if (areaRatio > 0.35) {
+                instruction = "Face centered but too big – move further.";
+              } else {
+                instruction = "Face centered!";
+              }
+            } else {
+              if (dx > tolerance) instruction += "Move right. ";
+              if (dx < -tolerance) instruction += "Move left. ";
+              if (dy > tolerance) instruction += "Move down. ";
+              if (dy < -tolerance) instruction += "Move up. ";
+            }
+            promptEl.innerText = instruction;
+            if (Math.abs(dx) < tolerance && Math.abs(dy) < tolerance &&
+                areaRatio >= 0.25 && areaRatio <= 0.35) {
+              verifyButton.disabled = false;
+            } else {
+              verifyButton.disabled = true;
+            }
+          } else {
+            promptEl.innerText = "No face detected";
+            verifyButton.disabled = true;
+          }
+        })
+        .catch(err => {
+          console.error("Face detection error:", err);
+          promptEl.innerText = "Error detecting face";
+          verifyButton.disabled = true;
+        })
+        .finally(() => {
+          requestAnimationFrame(detectFaces);
+        });
+    }
+    
+    function verifyIdentity() {
+      const originalColor = document.body.style.backgroundColor || '#888';
+      const flashInterval = setInterval(() => {
+        document.body.style.backgroundColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
+      }, 300);
+      setTimeout(() => {
+        clearInterval(flashInterval);
+        document.body.style.backgroundColor = originalColor;
+        // After verification, hide the verification card and show the ticket card
+        stopCamera();
+        verificationSection.style.display = 'none';
+        ticketSection.style.display = 'block';
+        // Initialize QR code and start countdown timer
+        generateQRCode();
+        startTimer();
+      }, 2000);
+    }
+    
+    startCamera();
+    requestAnimationFrame(detectFaces);
+    
+    /* ========== Ticket Section (QR Code & Countdown) ========== */
+    const qrCanvas = document.getElementById('qrCanvas');
+    const qrCtx = qrCanvas.getContext('2d');
+    const countdownTimerEl = document.getElementById('countdownTimer');
+    let timerInterval;
+    let countdown = 120; // 2 minutes
+    
+    const ticketData = JSON.parse(localStorage.getItem('ticketDetails')) || {
+      eventName: "Demo Event",
+      eventDate: "01 Jan 2025",
+      eventTime: "8:00 PM",
+      seatSection: "Section A"
+    };
+    document.getElementById('eventName').textContent = ticketData.eventName;
+    document.getElementById('eventDate').textContent = ticketData.eventDate;
+    document.getElementById('eventTime').textContent = ticketData.eventTime;
+    document.getElementById('seatSection').textContent = ticketData.seatSection;
+    
+    function generateQRCode() {
+      const gridSize = 20;
+      const squareSize = qrCanvas.width / gridSize;
+      for (let i = 0; i < gridSize; i++) {
+        for (let j = 0; j < gridSize; j++) {
+          qrCtx.fillStyle = Math.random() < 0.5 ? "#000" : "#fff";
+          qrCtx.fillRect(j * squareSize, i * squareSize, squareSize, squareSize);
+        }
+      }
+    }
+    
+    function startTimer() {
+      countdown = 120;
+      updateTimerDisplay(countdown);
+      timerInterval = setInterval(() => {
+        countdown--;
+        updateTimerDisplay(countdown);
+        if (countdown <= 0) {
+          clearInterval(timerInterval);
+          qrCtx.fillStyle = "#000";
+          qrCtx.fillRect(0, 0, qrCanvas.width, qrCanvas.height);
+          setTimeout(() => {
+            window.location.href = "dashboard.html#tab-my-tickets";
+          }, 1000);
+        }
+      }, 1000);
+    }
+    
+    function updateTimerDisplay(seconds) {
+      const minutes = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      countdownTimerEl.textContent = `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+  </script>
+</body>
+</html>

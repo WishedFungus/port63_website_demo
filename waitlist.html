@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Waitlist Flow</title>
+  <style>
+    /* UNIVERSAL STYLES */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+    .page {
+      display: none; /* Hide by default */
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    .page.active {
+      display: block; /* Only active page is visible */
+    }
+    .container {
+      background: #fff;
+      width: 650px; /* Wide enough for the content */
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin: auto;
+      text-align: center;
+      position: relative;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    h1, h2 {
+      color: #0071ce;
+      margin-bottom: 15px;
+    }
+    h1 { font-size: 24px; }
+    h2 { font-size: 20px; }
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      margin: 15px 10px;
+      background-color: #007bff;
+      color: #fff;
+      text-decoration: none;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    .btn:hover:not(:disabled) {
+      background-color: #0056b3;
+    }
+    .btn:disabled {
+      background-color: #ccc;
+      color: #666;
+      cursor: not-allowed;
+    }
+    /* Grey Back Button */
+    .back-btn {
+      background-color: #ccc;
+      color: #333;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .back-btn:hover { background-color: #bbb; }
+    /* SEAT SELECTION STYLES */
+    #seatingMap {
+      display: block;
+      margin: 0 auto 20px;
+      width: 600px;
+      height: 450px;
+      background: #eaeaea;
+      border: 1px solid #ccc;
+    }
+    .seat-area {
+      fill-opacity: 0.6;
+      cursor: pointer;
+      transition: fill-opacity 0.3s, stroke 0.3s;
+    }
+    .seat-area:hover {
+      fill-opacity: 0.8;
+      stroke: #000;
+      stroke-width: 2;
+    }
+    .seat-area.selected {
+      fill-opacity: 1;
+      stroke: #000;
+      stroke-width: 3;
+    }
+    .selected-seat-info {
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+    .selected-info-container {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .selected-info-left,
+    .selected-info-right {
+      width: 48%;
+    }
+    .selected-info-right { text-align: right; }
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 14px;
+      margin: 5px;
+    }
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    /* QUANTITY PROMPT */
+    #quantityPrompt {
+      color: red;
+      text-align: left;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    /* Account number inputs */
+    #accountNumbersContainer input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+    /* Additional Pages Styling */
+    .instructions {
+      text-align: left;
+      margin: 20px 0;
+      font-size: 14px;
+      color: #333;
+      border: 1px solid #ddd;
+      padding: 10px;
+      border-radius: 4px;
+      background: #fafafa;
+    }
+    .chk-container {
+      text-align: left;
+      margin: 15px 0;
+      font-size: 14px;
+      color: #333;
+    }
+    .form-group {
+      margin-bottom: 15px;
+      text-align: left;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+    .form-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .btn-save {
+      width: 100%;
+      padding: 12px;
+      background-color: #007bff;
+      border: none;
+      color: #fff;
+      font-size: 18px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-save:hover { background-color: #0056b3; }
+    .error {
+      color: red;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+    .disclaimer {
+      font-size: 12px;
+      color: #666;
+      margin-top: 15px;
+      text-align: center;
+    }
+    /* Footer text */
+    .powered-by {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #888;
+    }
+    /* Summary Table Styling */
+    .summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    .summary-table th,
+    .summary-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+      font-size: 14px;
+    }
+    .summary-table th {
+      background-color: #0071ce;
+      color: #fff;
+    }
+    /* Centered button group for Payment Instructions page */
+    .payment-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <!-- PAGE 0: LOGIN PAGE -->
+  <div id="loginPage" class="page active">
+    <div class="container">
+      <h1>Login</h1>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="loginEmail">Email</label>
+          <input type="email" id="loginEmail" required placeholder="admin@abc.com">
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" required placeholder="pw">
+        </div>
+        <button type="submit" class="btn">Login</button>
+      </form>
+      <div class="powered-by">Powered by Genuitix</div>
+    </div>
+  </div>
+
+  <!-- PAGE 1: SEAT SELECTION -->
+  <div id="seatSelectionPage" class="page">
+    <div class="container">
+      <h1>Waitlist Entry</h1>
+      <h2>Select Your Seat Section</h2>
+      <p id="seatSelectionInstructions">
+        Please pick the sections that you would prefer to sit at. Multiple selections are allowed.
+        We will assign you the first seats that fit your criteria.
+      </p>
+      <svg id="seatingMap" viewBox="0 0 600 450">
+        <rect x="220" y="400" width="160" height="30" fill="#000" />
+        <text x="300" y="420" fill="#fff" font-size="14" text-anchor="middle" alignment-baseline="middle">STAGE</text>
+        <polygon class="seat-area" data-cat="CAT1" data-price="150" points="260,340 340,340 350,390 250,390" fill="#ff6666" />
+        <polygon class="seat-area" data-cat="CAT2" data-price="120" points="170,310 260,340 250,390 160,360" fill="#ffa500" />
+        <polygon class="seat-area" data-cat="CAT2" data-price="120" points="340,340 430,310 440,360 350,390" fill="#ffa500" />
+        <polygon class="seat-area" data-cat="CAT3" data-price="100" points="140,240 170,310 160,360 110,300" fill="#34d399" />
+        <polygon class="seat-area" data-cat="CAT3" data-price="100" points="430,310 460,240 490,300 440,360" fill="#34d399" />
+        <polygon class="seat-area" data-cat="CAT4" data-price="80" points="200,170 400,170 460,240 140,240" fill="#60a5fa" />
+      </svg>
+      <div id="selectedSeat" class="selected-seat-info"></div>
+      <div class="legend">
+        <div class="legend-item"><span class="legend-color" style="background:#ff6666;"></span>CAT1 - $150</div>
+        <div class="legend-item"><span class="legend-color" style="background:#ffa500;"></span>CAT2 - $120</div>
+        <div class="legend-item"><span class="legend-color" style="background:#34d399;"></span>CAT3 - $100</div>
+        <div class="legend-item"><span class="legend-color" style="background:#60a5fa;"></span>CAT4 - $80</div>
+      </div>
+      <p id="quantityPrompt"></p>
+      <label for="quantitySelector" style="font-size:16px; display:block; margin-bottom:5px; text-align:left;">Quantity:</label>
+      <select id="quantitySelector" style="font-size:16px; padding:5px; margin-bottom:20px; width:100%;">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+      </select>
+      <div id="accountNumbersContainer"></div>
+      <button class="btn" id="btnConfirmSeat">Confirm Selection</button>
+      <div class="powered-by">Powered by Genuitix</div>
+    </div>
+  </div>
+  
+  <!-- PAGE 2: PAYMENT INSTRUCTIONS -->
+  <div id="paymentInstructions" class="page">
+    <div class="container">
+      <h1>Payment Instructions</h1>
+      <div class="instructions">
+        <p><strong>Instructions:</strong></p>
+        <p>Please review the following instructions before proceeding:</p>
+        <p><strong>Add a credit card:</strong><br>
+           We recommend adding your credit card details to ensure you don’t miss your turn.
+           Tickets will be purchased automatically if your preferences become available.
+        </p>
+        <p><strong>Pay Later:</strong><br>
+           If you choose this option, you’ll receive email notifications as you approach the front of the waitlist.
+           You’ll have 15 minutes to pay once it’s your turn.
+        </p>
+      </div>
+      <div class="chk-container">
+        <input type="checkbox" id="chkInstructionsMain">
+        <label for="chkInstructionsMain">I have read and understood the instructions</label>
+      </div>
+      <!-- Centered buttons container -->
+      <div class="payment-buttons">
+        <button class="btn back-btn" id="btnBackFromMain">Back</button>
+        <button class="btn" id="btnPayLater" disabled>Pay Later</button>
+        <button class="btn" id="btnAddCreditCard" disabled>Add Credit Card</button>
+      </div>
+      <div class="powered-by">Powered by Genuitix</div>
+    </div>
+  </div>
+  
+  <!-- PAGE 3: CARD COLLECTOR -->
+  <div id="cardCollectorPage" class="page">
+    <div class="container">
+      <h2>Store Your Card Details</h2>
+      <form id="cardForm">
+        <div class="form-group">
+          <label for="cardNumber">Card Number</label>
+          <input type="text" id="cardNumber" name="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" required>
+          <div class="error" id="cardNumberError"></div>
+        </div>
+        <div class="form-group">
+          <label for="cardHolder">Card Holder Name</label>
+          <input type="text" id="cardHolder" name="cardHolder" placeholder="John Doe" required>
+          <div class="error" id="cardHolderError"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="expiryDate">Expiry Date (MM/YY)</label>
+            <input type="text" id="expiryDate" name="expiryDate" placeholder="MM/YY" maxlength="5" required>
+            <div class="error" id="expiryDateError"></div>
+          </div>
+          <div class="form-group">
+            <label for="cvv">CVV</label>
+            <input type="text" id="cvv" name="cvv" placeholder="123" maxlength="3" required>
+            <div class="error" id="cvvError"></div>
+          </div>
+        </div>
+        <button type="submit" class="btn-save">Save Card</button>
+      </form>
+      <div class="disclaimer">
+        * This demo does not securely store your credit card details. Do not use this in production.
+      </div>
+      <button class="btn back-btn" id="btnBackFromCollector">Back</button>
+      <div class="powered-by">Powered by Genuitix</div>
+    </div>
+  </div>
+  
+  <!-- PAGE 4: SUMMARY -->
+  <div id="summaryPage" class="page">
+    <div class="container">
+      <h1>Summary</h1>
+      <div id="summaryContent" style="text-align:left; margin-bottom:20px;"></div>
+      <div id="payLaterInfo" style="display:none; color:red; font-size:16px; text-align:left; margin-bottom:10px;">
+        As you have selected to pay later, please ensure you pay within 15 minutes of your turn.
+        If you don’t, the tickets are released, and you’ll rejoin the waitlist.
+      </div>
+      <div class="chk-container" style="text-align:left;">
+        <input type="checkbox" id="chkSummary">
+        <label for="chkSummary">I have checked my details and I understand that no changes can be made beyond this point.</label>
+      </div>
+      <button class="btn back-btn" id="btnBackFromSummary">Back</button>
+      <button class="btn" id="btnConfirmSummary" disabled>Confirm Waitlist Submission</button>
+      <div class="powered-by">Powered by Genuitix</div>
+    </div>
+  </div>
+  
+  <!-- PAGE 5: THANK YOU -->
+  <div id="thankYouPage" class="page">
+    <div class="container">
+      <h1>Thank You</h1>
+      <p>You have been placed in the waitlist. A confirmation email has been sent for your record.</p>
+      <button class="btn" id="btnBackFromThankYou">Back to Main Page</button>
+      <div class="powered-by">Powered by Genuitix</div>
+    </div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // ---------- LOGIN PAGE FUNCTIONALITY ----------
+      function showPage(pageId) {
+        document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+        if(pageId === 'summaryPage'){
+          updateSummary();
+        }
+      }
+
+      const loginForm = document.getElementById('loginForm');
+      if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          const email = document.getElementById('loginEmail').value.trim();
+          const password = document.getElementById('loginPassword').value.trim();
+          if(email === 'admin@abc.com' && password === 'pw') {
+            showPage('seatSelectionPage');
+          } else {
+            alert('Invalid credentials. Please try again.');
+          }
+        });
+      }
+
+      // ---------- PAGE 1: SEAT SELECTION -----------
+      let selectedSections = {};
+      const seatAreas = document.querySelectorAll('.seat-area');
+      const quantitySelector = document.getElementById('quantitySelector');
+
+      function updateSelectedDisplay() {
+        const display = document.getElementById('selectedSeat');
+        const qty = Number(quantitySelector.value);
+        const categories = Object.keys(selectedSections);
+        if(categories.length === 0) {
+          display.innerHTML = `
+            <div class="selected-info-container">
+              <div class="selected-info-left">Selected Section: None</div>
+              <div class="selected-info-right">Total: $0</div>
+            </div>
+          `;
+        } else {
+          let highest = 0;
+          categories.forEach(cat => {
+            const price = Number(selectedSections[cat]);
+            if(price > highest) highest = price;
+          });
+          const total = highest * qty;
+          const list = categories.map(cat => `${cat} ($${selectedSections[cat]})`).join(", ");
+          display.innerHTML = `
+            <div class="selected-info-container">
+              <div class="selected-info-left">
+                <strong>Selected Section:</strong> ${list}
+              </div>
+              <div class="selected-info-right">
+                <strong>${qty} x $${highest} = $${total}</strong>
+              </div>
+            </div>
+          `;
+        }
+      }
+
+      seatAreas.forEach(area => {
+        area.addEventListener('click', () => {
+          const cat = area.getAttribute('data-cat');
+          const price = area.getAttribute('data-price');
+          if(area.classList.contains('selected')) {
+            area.classList.remove('selected');
+            const others = document.querySelectorAll(`.seat-area[data-cat="${cat}"]`);
+            let stillSelected = false;
+            others.forEach(o => { if(o.classList.contains('selected')) stillSelected = true; });
+            if(!stillSelected) { delete selectedSections[cat]; }
+          } else {
+            area.classList.add('selected');
+            selectedSections[cat] = price;
+          }
+          updateSelectedDisplay();
+        });
+      });
+
+      function checkConfirmButtonState() {
+        const btn = document.getElementById('btnConfirmSeat');
+        const qty = Number(quantitySelector.value);
+        if(qty > 1) {
+          const inputs = document.querySelectorAll('#accountNumbersContainer input');
+          let allValid = true;
+          inputs.forEach(input => {
+            if(!/^\d{9}$/.test(input.value.trim())) { allValid = false; }
+          });
+          if(!allValid) { btn.classList.add('btn-disabled'); }
+          else { btn.classList.remove('btn-disabled'); }
+          return allValid;
+        } else {
+          btn.classList.remove('btn-disabled');
+          return true;
+        }
+      }
+
+      function updateAccountInputs() {
+        const container = document.getElementById('accountNumbersContainer');
+        const qty = Number(quantitySelector.value);
+        const currentInputs = container.querySelectorAll('input');
+        let currentValues = [];
+        currentInputs.forEach(input => currentValues.push(input.value));
+        container.innerHTML = '';
+        const quantityPromptElem = document.getElementById('quantityPrompt');
+        if(qty > 1) {
+          quantityPromptElem.textContent = `*Seats will only be assigned if the sections have ${qty} seats available.`;
+          const prompt = document.createElement('p');
+          prompt.textContent = "Please input the account numbers of the people you would like to go with:";
+          prompt.style.textAlign = 'left';
+          prompt.style.fontSize = '16px';
+          prompt.style.marginBottom = '10px';
+          container.appendChild(prompt);
+          const numInputs = qty - 1;
+          for(let i = 0; i < numInputs; i++) {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.placeholder = `Account Number ${i+1}`;
+            input.maxLength = 9;
+            input.style.width = "100%";
+            input.addEventListener('keypress', function(e) {
+              if(!/[0-9]/.test(e.key)) e.preventDefault();
+            });
+            if(i < currentValues.length) { input.value = currentValues[i]; }
+            input.addEventListener('input', checkConfirmButtonState);
+            container.appendChild(input);
+          }
+        } else {
+          quantityPromptElem.textContent = '';
+        }
+        checkConfirmButtonState();
+      }
+
+      updateAccountInputs();
+      quantitySelector.addEventListener('change', () => {
+        updateSelectedDisplay();
+        updateAccountInputs();
+      });
+
+      document.getElementById('btnConfirmSeat').addEventListener('click', function(e) {
+        e.preventDefault();
+        if(!checkConfirmButtonState()) {
+          alert("Please fill in the account numbers with exactly 9 digits each.");
+          return;
+        }
+        if(Object.keys(selectedSections).length === 0) {
+          alert("Please select at least one seat section.");
+        } else {
+          const qty = quantitySelector.value;
+          const accountInputs = document.querySelectorAll('#accountNumbersContainer input');
+          let accountNumbers = [];
+          accountInputs.forEach(input => accountNumbers.push(input.value.trim()));
+          localStorage.setItem('seatSelection', JSON.stringify({
+            selections: selectedSections,
+            quantity: qty,
+            accounts: accountNumbers
+          }));
+          localStorage.removeItem('paymentMethod');
+          showPage('paymentInstructions');
+        }
+      });
+
+      // ---------- PAGE 2: PAYMENT INSTRUCTIONS -----------
+      const chkInstructionsMain = document.getElementById('chkInstructionsMain');
+      const btnAddCreditCard = document.getElementById('btnAddCreditCard');
+      const btnPayLater = document.getElementById('btnPayLater');
+
+      chkInstructionsMain.addEventListener('change', function() {
+        btnAddCreditCard.disabled = !this.checked;
+        btnPayLater.disabled = !this.checked;
+      });
+
+      // Pay Later
+      btnPayLater.addEventListener('click', function(e) {
+        e.preventDefault();
+        localStorage.setItem('paymentMethod', "payLater");
+        showPage('summaryPage');
+      });
+
+      // Add Credit Card
+      btnAddCreditCard.addEventListener('click', function(e) {
+        e.preventDefault();
+        localStorage.setItem('paymentMethod', "creditCard");
+        showPage('cardCollectorPage');
+      });
+
+      document.getElementById('btnBackFromMain').addEventListener('click', function(e) {
+        e.preventDefault();
+        showPage('seatSelectionPage');
+      });
+
+      // ---------- PAGE 3: CARD COLLECTOR -----------
+      document.getElementById('btnBackFromCollector').addEventListener('click', function(e) {
+        e.preventDefault();
+        showPage('paymentInstructions');
+      });
+      document.getElementById('cardForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        document.getElementById('cardNumberError').textContent = "";
+        document.getElementById('cardHolderError').textContent = "";
+        document.getElementById('expiryDateError').textContent = "";
+        document.getElementById('cvvError').textContent = "";
+
+        const cardNumber = document.getElementById('cardNumber').value.trim();
+        const cardHolder = document.getElementById('cardHolder').value.trim();
+        const expiryDate = document.getElementById('expiryDate').value.trim();
+        const cvv = document.getElementById('cvv').value.trim();
+        let valid = true;
+
+        if(cardNumber.length < 13 || cardNumber.length > 19) {
+          document.getElementById('cardNumberError').textContent = "Invalid card number";
+          valid = false;
+        }
+        if(cardHolder === "") {
+          document.getElementById('cardHolderError').textContent = "Card holder name required";
+          valid = false;
+        }
+        if(!/^(0[1-9]|1[0-2])\/\d{2}$/.test(expiryDate)) {
+          document.getElementById('expiryDateError').textContent = "Invalid expiry date";
+          valid = false;
+        }
+        if(!/^\d{3}$/.test(cvv)) {
+          document.getElementById('cvvError').textContent = "Invalid CVV";
+          valid = false;
+        }
+
+        if(valid) {
+          const cardDetails = {
+            cardNumber: cardNumber,
+            cardHolder: cardHolder,
+            expiryDate: expiryDate,
+            cvv: cvv
+          };
+          localStorage.setItem('walletCard', JSON.stringify(cardDetails));
+          localStorage.setItem('paymentMethod', "creditCard");
+          showPage('summaryPage');
+        }
+      });
+
+      // ---------- PAGE 4: SUMMARY -----------
+      function updateSummary() {
+        const summaryContent = document.getElementById('summaryContent');
+        const seatSelectionData = JSON.parse(localStorage.getItem('seatSelection'));
+        const paymentMethod = localStorage.getItem('paymentMethod');
+        let summaryHTML = "";
+
+        // Retrieve event name from localStorage (default to "Demo Event" if not set)
+        const eventName = localStorage.getItem('eventName') || "Demo Event";
+
+        if(seatSelectionData) {
+          summaryHTML += "<h3>Seat Selection</h3>";
+          summaryHTML += "<table class='summary-table'>";
+          // Row for Event Name
+          summaryHTML += `<tr><td><strong>Event Name</strong></td><td>${eventName}</td></tr>`;
+          summaryHTML += `<tr><td><strong>Sections</strong></td><td>${Object.keys(seatSelectionData.selections)
+            .map(cat => `${cat} ($${seatSelectionData.selections[cat]})`)
+            .join(", ")}</td></tr>`;
+          summaryHTML += `<tr><td><strong>Quantity</strong></td><td>${seatSelectionData.quantity}</td></tr>`;
+          if(seatSelectionData.accounts && seatSelectionData.accounts.length > 0) {
+            summaryHTML += `<tr><td><strong>Additional Accounts</strong></td><td>${seatSelectionData.accounts.join(", ")}</td></tr>`;
+          }
+          summaryHTML += "</table>";
+        }
+        if(paymentMethod === "creditCard") {
+          const cardData = JSON.parse(localStorage.getItem('walletCard'));
+          if(cardData) {
+            summaryHTML += "<h3>Card Details</h3>";
+            summaryHTML += "<table class='summary-table'>";
+            const maskedCard = "**** **** **** " + cardData.cardNumber.slice(-4);
+            summaryHTML += `<tr><td><strong>Card Holder</strong></td><td>${cardData.cardHolder}</td></tr>`;
+            summaryHTML += `<tr><td><strong>Card Number</strong></td><td>${maskedCard}</td></tr>`;
+            summaryHTML += `<tr><td><strong>Expiry</strong></td><td>${cardData.expiryDate}</td></tr>`;
+            summaryHTML += "</table>";
+          }
+          document.getElementById('payLaterInfo').style.display = "none";
+        } else {
+          summaryHTML += "<h3>Payment Method</h3>";
+          summaryHTML += "<table class='summary-table'>";
+          summaryHTML += `<tr><td>You have selected to pay later.</td></tr>`;
+          summaryHTML += "</table>";
+          document.getElementById('payLaterInfo').style.display = "block";
+        }
+        summaryContent.innerHTML = summaryHTML;
+      }
+
+      document.getElementById('btnConfirmSummary').addEventListener('click', function(e) {
+        e.preventDefault();
+        const chk = document.getElementById('chkSummary');
+        if(!chk.checked) {
+          alert("Please check the box to confirm that you have reviewed your details.");
+          return;
+        }
+        showPage('thankYouPage');
+      });
+
+      document.getElementById('btnBackFromSummary').addEventListener('click', function(e) {
+        e.preventDefault();
+        const paymentMethod = localStorage.getItem('paymentMethod');
+        if(paymentMethod === "payLater") {
+          showPage('paymentInstructions');
+        } else {
+          showPage('cardCollectorPage');
+        }
+      });
+
+      // ---------- PAGE 5: THANK YOU -----------
+      document.getElementById('btnBackFromThankYou').addEventListener('click', function(e) {
+        e.preventDefault();
+        localStorage.clear();
+        window.location.href = 'index.html';
+      });
+      
+      // Enable "Confirm Waitlist Submission" button on Summary when Checkbox is checked
+      const chkSummary = document.getElementById('chkSummary');
+      const btnConfirmSummary = document.getElementById('btnConfirmSummary');
+      chkSummary.addEventListener('change', function() {
+        btnConfirmSummary.disabled = !this.checked;
+      });
+    });
+    
+    /* =================== BUYER & SELLER FLOW Script =================== */
+    /* =================== BUYER FLOW =================== */
+    let buyerTicketPrice = 0;
+    let buyerConcertID = "";
+    let buyerGeneratedCodes = {};
+    let buyerTimerInterval;
+    const buyerTermsCheckbox = document.getElementById('buyerTermsCheckbox');
+    const buyerContinueBtn = document.getElementById('buyerContinueBtn');
+    buyerTermsCheckbox.addEventListener('change', function() {
+      buyerContinueBtn.disabled = !this.checked;
+    });
+    buyerContinueBtn.addEventListener('click', function() {
+      showBuyerFlowPage('buy-homePage');
+    });
+    document.querySelectorAll('#buyCodeInputs .buy-code').forEach((input, index, arr) => {
+      input.addEventListener('input', () => {
+        if(input.value.length === input.maxLength && index < arr.length - 1) {
+          arr[index + 1].focus();
+        }
+      });
+    });
+    const buyInputs = document.querySelectorAll('#buyCodeInputs .buy-code');
+    document.getElementById('buyerBackBtn').addEventListener('click', function() {
+      showBuyerFlowPage('buy-termsPage');
+    });
+    document.getElementById('buyerConfirmBtn').addEventListener('click', function() {
+      let buyerCode = "";
+      buyInputs.forEach(input => { buyerCode += input.value.toUpperCase(); });
+      if(buyerCode.length !== 6) {
+        alert("Please enter the complete 6-character code.");
+        return;
+      }
+      // For demo, assume code is valid and set a demo price
+      buyerTicketPrice = 100; 
+      let fee = buyerTicketPrice * 0.02;
+      let totalCost = buyerTicketPrice + fee;
+      document.getElementById('buyerPriceSummary').innerHTML =
+        `Ticket Price: $${buyerTicketPrice.toFixed(2)}<br>Transaction Fee (2%): $${fee.toFixed(2)}<br>Total Cost: $${totalCost.toFixed(2)}`;
+      document.getElementById('buyerSummaryTicketDetail').textContent = "Selected Ticket: Demo Ticket";
+      showBuyerFlowPage('buyerSummaryPage');
+    });
+    document.getElementById('buyerSummaryBackBtn').addEventListener('click', function() {
+      showBuyerFlowPage('buy-homePage');
+    });
+    document.getElementById('buyerProceedToPaymentBtn').addEventListener('click', function() {
+      showBuyerFlowPage('buyerPaymentPage');
+    });
+    document.getElementById('buyerPaymentBackBtn').addEventListener('click', function() {
+      showBuyerFlowPage('buyerSummaryPage');
+    });
+    document.getElementById('buyerPaymentForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      showBuyerFlowPage('buyerThankYouPage');
+    });
+    document.getElementById('buyerBackToHomeBtn').addEventListener('click', function(){
+      document.querySelectorAll('#buyerFlow input').forEach(input => input.value = "");
+      document.getElementById('buyerTermsCheckbox').checked = false;
+      showBuyerFlowPage('buy-termsPage');
+    });
+    function showBuyerFlowPage(pageId) {
+      document.querySelectorAll('.buy-from-flow .page').forEach(p => p.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+    }
+    /* =================== SELLER FLOW =================== */
+    let sellerTicket = "";
+    let sellerTicketPrice = 0;
+    let sellerConcertID = "";
+    let sellerGeneratedCodes = {};
+    let sellerTimerInterval;
+    let sellerMethod = "";
+    const sellerTermsCheckbox = document.getElementById('sellerTermsCheckbox');
+    const sellerContinueBtn = document.getElementById('sellerContinueBtn');
+    sellerTermsCheckbox.addEventListener('change', function() {
+      sellerContinueBtn.disabled = !this.checked;
+    });
+    sellerContinueBtn.addEventListener('click', function() {
+      showSellerFlowPage('sellerHomePage');
+    });
+    document.getElementById('sellerBackBtn').addEventListener('click', function() {
+      showSellerFlowPage('sell-termsPage');
+    });
+    document.getElementById('sellerPersonBtn').addEventListener('click', function() {
+      sellerMethod = "person";
+      showSellerFlowPage('sellerSelectTicketPage');
+    });
+    document.getElementById('sellerMarketplaceBtn').addEventListener('click', function() {
+      sellerMethod = "marketplace";
+      showSellerFlowPage('sellerSelectTicketPage');
+    });
+    const sellerConcertSelect = document.getElementById('sellerConcertSelect');
+    const sellerTicketDetailsDiv = document.getElementById('sellerTicketDetails');
+    const sellerConcertDetails = {
+      "RockFest | 2025-06-21": "RockFest, Section A, $120",
+      "Jazz Night | 2025-07-10": "Jazz Night, Section B, $100",
+      "Pop Extravaganza | 2025-08-15": "Pop Extravaganza, Section C, $150",
+      "Classical Evenings | 2025-09-05": "Classical Evenings, Section D, $80"
+    };
+    sellerConcertSelect.addEventListener('change', function() {
+      const selected = sellerConcertSelect.value;
+      if(selected && sellerConcertDetails[selected]) {
+        let parts = sellerConcertDetails[selected].split(',');
+        let ticketInfo = parts[0] + ", " + parts[1].trim();
+        sellerTicketDetailsDiv.textContent = ticketInfo;
+      } else {
+        sellerTicketDetailsDiv.textContent = "";
+      }
+    });
+    document.getElementById('sellerProceedBtn').addEventListener('click', function() {
+      if(!sellerConcertSelect.value) {
+        alert("Please select a concert first.");
+        return;
+      }
+      sellerConcertID = sellerConcertSelect.value;
+      let detail = sellerConcertDetails[sellerConcertID];
+      let parts = detail.split(',');
+      sellerTicket = sellerConcertID + " - " + parts[0] + ", " + parts[1].trim();
+      let priceMatch = detail.match(/\$(\d+(\.\d+)?)/);
+      if(priceMatch) {
+        sellerTicketPrice = parseFloat(priceMatch[1]);
+      }
+      if(sellerMethod === "person") {
+        document.getElementById('sellerPersonSummaryTicketDetail').textContent = "Selected Ticket: " + sellerTicket;
+        let fee = sellerTicketPrice * 0.02;
+        let net = sellerTicketPrice - fee;
+        document.getElementById('sellerPriceSummary').innerHTML =
+          `Ticket Price: $${sellerTicketPrice.toFixed(2)}<br>Transaction Fee (2%): $${fee.toFixed(2)}<br>Net Amount Returned: $${net.toFixed(2)}`;
+        showSellerFlowPage('sellerPersonSummaryPage');
+      } else if(sellerMethod === "marketplace") {
+        document.getElementById('sellerSummaryTicketDetail').textContent = "Selected Ticket: " + sellerTicket;
+        let fee = sellerTicketPrice * 0.02;
+        let net = sellerTicketPrice - fee;
+        document.getElementById('sellerMarketplacePriceSummary').innerHTML =
+          `Ticket Price: $${sellerTicketPrice.toFixed(2)}<br>Transaction Fee (2%): $${fee.toFixed(2)}<br>Net Amount Returned: $${net.toFixed(2)}`;
+        showSellerFlowPage('sellerSummaryPage');
+      }
+    });
+    document.getElementById('sellerSelectTicketBackBtn').addEventListener('click', function() {
+      showSellerFlowPage('sellerHomePage');
+    });
+    document.getElementById('sellerProceedToGenCodeBtn').addEventListener('click', function() {
+      showSellerFlowPage('sellerGenerateCodePage');
+    });
+    document.getElementById('sellerPersonSummaryBackBtn').addEventListener('click', function() {
+      showSellerFlowPage('sellerSelectTicketPage');
+    });
+    const sellerTermsCheckbox2 = document.getElementById('sellerTermsCheckbox2');
+    const sellerGenerateCodeBtn = document.getElementById('sellerGenerateCodeBtn');
+    sellerTermsCheckbox2.addEventListener('change', function() {
+      if(!sellerGeneratedCodeExists()) {
+        sellerGenerateCodeBtn.disabled = !this.checked;
+      }
+    });
+    document.getElementById('sellerGenCodeBackBtn').addEventListener('click', function() {
+      sellerTermsCheckbox2.checked = false;
+      sellerTermsCheckbox2.disabled = false;
+      sellerGenerateCodeBtn.disabled = true;
+      showSellerFlowPage('sellerPersonSummaryPage');
+    });
+    document.getElementById('sellerFinishBtn').addEventListener('click', function() {
+      showSellerFlowPage('sellerThankYouPage');
+    });
+    function sellerGeneratedCodeExists() {
+      return (sellerConcertID in sellerGeneratedCodes) && (sellerGeneratedCodes[sellerConcertID].expiresAt > Date.now());
+    }
+    function sellerDisplayCode() {
+      if(sellerGeneratedCodeExists()) {
+        const codeObj = sellerGeneratedCodes[sellerConcertID];
+        const boxes = document.querySelectorAll('#sellerCodeDisplay .code-box');
+        boxes.forEach((box, i) => { box.textContent = codeObj.code[i]; });
+        sellerGenerateCodeBtn.disabled = true;
+        document.getElementById('sellerCodeCheckboxContainer').style.display = "none";
+        document.getElementById('sellerCodeInstruction').textContent = "A code has already been generated for this ticket. Please wait for it to expire before generating a new one.";
+        updateSellerTimerDisplay(Math.floor((codeObj.expiresAt - Date.now()) / 1000));
+        sellerTimerInterval = setInterval(function(){
+          const remaining = Math.floor((codeObj.expiresAt - Date.now()) / 1000);
+          updateSellerTimerDisplay(remaining);
+          if(remaining <= 0){
+            clearInterval(sellerTimerInterval);
+            delete sellerGeneratedCodes[sellerConcertID];
+            sellerResetGenerateCodePage();
+          }
+        }, 1000);
+        return;
+      }
+      const code = sellerGenerateRandomCode();
+      const expiresAt = Date.now() + 300000;
+      sellerGeneratedCodes[sellerConcertID] = { code, expiresAt };
+      const boxes = document.querySelectorAll('#sellerCodeDisplay .code-box');
+      boxes.forEach((box, i) => { box.textContent = code[i]; });
+      sellerGenerateCodeBtn.disabled = true;
+      document.getElementById('sellerCodeCheckboxContainer').style.display = "none";
+      document.getElementById('sellerCodeInstruction').textContent = "A code has been generated. Please wait for it to expire.";
+      updateSellerTimerDisplay(Math.floor((expiresAt - Date.now()) / 1000));
+      sellerTimerInterval = setInterval(function(){
+        const remaining = Math.floor((expiresAt - Date.now()) / 1000);
+        updateSellerTimerDisplay(remaining);
+        if(remaining <= 0){
+          clearInterval(sellerTimerInterval);
+          delete sellerGeneratedCodes[sellerConcertID];
+          sellerResetGenerateCodePage();
+        }
+      }, 1000);
+    }
+    function sellerResetGenerateCodePage() {
+      document.getElementById('sellerCodeCheckboxContainer').style.display = "block";
+      sellerTermsCheckbox2.checked = false;
+      sellerTermsCheckbox2.disabled = false;
+      sellerGenerateCodeBtn.disabled = true;
+      document.getElementById('sellerCodeInstruction').textContent = "Ensure you are ready to sell; once the code is used, the ticket will be locked for 24 hours.";
+      sellerClearCode();
+    }
+    function sellerClearCode() {
+      document.querySelectorAll('#sellerCodeDisplay .code-box').forEach(box => { box.textContent = ""; });
+      document.getElementById('sellerTimer').textContent = "Time left: 05:00";
+    }
+    function sellerGenerateRandomCode() {
+      const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      let code = '';
+      for(let i = 0; i < 6; i++){
+        code += characters.charAt(Math.floor(Math.random() * characters.length));
+      }
+      return code;
+    }
+    function updateSellerTimerDisplay(seconds) {
+      const timerEl = document.getElementById('sellerTimer');
+      const minutes = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      timerEl.textContent = `Time left: ${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    document.getElementById('sellerGenerateCodeBtn').addEventListener('click', function(){
+      sellerDisplayCode();
+    });
+    document.getElementById('sellerSummaryTermsCheckbox').addEventListener('change', function() {
+      document.getElementById('sellerConfirmSellBtn').disabled = !this.checked;
+    });
+    document.getElementById('sellerConfirmSellBtn').addEventListener('click', function() {
+      showSellerFlowPage('sellerThankYouPage');
+    });
+    document.getElementById('sellerSummaryBackBtn').addEventListener('click', function() {
+      showSellerFlowPage('sellerSelectTicketPage');
+    });
+    document.getElementById('sellerBackToHomeBtn').addEventListener('click', function() {
+      sellerGeneratedCodes = {};
+      showSellerFlowPage('sell-termsPage');
+    });
+    function showSellerFlowPage(pageId) {
+      document.querySelectorAll('.sell-flow .page').forEach(p => p.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+    }
+
+    /* =================== VIEW TICKET HANDLERS =================== */
+    const ticketData = [
+      { eventName: "Rock Concert 2025", eventDate: "21 Jun 2025", eventTime: "8:00 PM", seatSection: "Section A" },
+      { eventName: "Jazz Night", eventDate: "10 Jul 2025", eventTime: "7:30 PM", seatSection: "Section B" },
+      { eventName: "Comedy Show", eventDate: "15 Aug 2025", eventTime: "9:00 PM", seatSection: "Section C" }
+    ];
+    document.querySelectorAll('.ticket-card').forEach((card, index) => {
+      card.addEventListener('click', function() {
+        localStorage.setItem('ticketDetails', JSON.stringify(ticketData[index]));
+        window.location.href = "ticketDetails.html";
+      });
+    });
+  </script>
+</body>
+</html>

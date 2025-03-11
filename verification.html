@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ticketmaster SG - Verification</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background-color: #888;
+      color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .verification-card {
+      background-color: #fff;
+      width: 350px;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      overflow: hidden;
+      text-align: center;
+    }
+    .card-header {
+      background-color: #0071ce;
+      padding: 15px;
+      color: #fff;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .card-body { padding: 20px; }
+    .card-body h1 { font-size: 22px; margin-bottom: 20px; color: #333; }
+    .code-input-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .code-input-container input {
+      width: 45px;
+      height: 45px;
+      font-size: 24px;
+      text-align: center;
+      margin: 0 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #0071ce;
+      color: #fff;
+      border: none;
+      padding: 12px;
+      width: 100%;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin-bottom: 15px;
+    }
+    button:hover { background-color: #005c9e; }
+    .back-to-registration {
+      margin-top: 15px;
+      font-size: 14px;
+    }
+    .back-to-registration a {
+      color: #0071ce;
+      text-decoration: none;
+    }
+    .back-to-registration a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="verification-card">
+    <div class="card-header">ticketmaster</div>
+    <div class="card-body">
+      <h1>Verification</h1>
+      <p>A verification code has been sent to your phone. Please enter it below:</p>
+      <div class="code-input-container">
+        <input type="text" maxlength="1" />
+        <input type="text" maxlength="1" />
+        <input type="text" maxlength="1" />
+        <input type="text" maxlength="1" />
+        <input type="text" maxlength="1" />
+        <input type="text" maxlength="1" />
+      </div>
+      <button type="button" onclick="goToIdentityVerification()">Verify</button>
+      <div class="back-to-registration">
+        <a href="sign-up.html">Back to Registration</a>
+      </div>
+    </div>
+  </div>
+  <script>
+    function goToIdentityVerification() {
+      window.location.href = "identityVerification.html";
+    }
+  </script>
+</body>
+</html>

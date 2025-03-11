@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ticketmaster SG - Registration</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background-color: #888;
+      color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .registration-card {
+      background-color: #fff;
+      width: 350px;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      overflow: hidden;
+      text-align: center;
+    }
+    .card-header {
+      background-color: #0071ce;
+      padding: 15px;
+      color: #fff;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .card-body { padding: 20px; }
+    .card-body h1 { font-size: 22px; margin-bottom: 20px; color: #333; }
+    label { font-size: 16px; color: #333; display: block; text-align: left; margin-bottom: 5px; }
+    input {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #0071ce;
+      color: #fff;
+      border: none;
+      padding: 12px;
+      width: 100%;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover { background-color: #005c9e; }
+    .back-to-signin { margin-top: 15px; font-size: 14px; }
+    .back-to-signin a { color: #0071ce; text-decoration: none; }
+    .back-to-signin a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="registration-card">
+    <div class="card-header">ticketmaster</div>
+    <div class="card-body">
+      <h1>Registration</h1>
+      <form id="registrationForm">
+        <label for="regUsername">Username:</label>
+        <input type="text" id="regUsername" name="regUsername" required />
+        <label for="regEmail">Email:</label>
+        <input type="email" id="regEmail" name="regEmail" required />
+        <label for="regPhone">Phone Number:</label>
+        <input type="tel" id="regPhone" name="regPhone" required />
+        <button type="button" onclick="goToVerification()">Submit Registration</button>
+      </form>
+      <div class="back-to-signin">
+        Already have an account? <a href="sign-in.html">Sign In</a>
+      </div>
+    </div>
+  </div>
+  <script>
+    function goToVerification() {
+      window.location.href = "verification.html";
+    }
+  </script>
+</body>
+</html>
