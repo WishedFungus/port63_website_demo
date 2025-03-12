@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <!-- Mobile viewport -->
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Ticketmaster SG - Sign In</title>
   <style>
-    /* Basic styling for sign in */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -19,7 +19,8 @@
     }
     .sign-in-card {
       background-color: #fff;
-      width: 320px;
+      width: 90%;
+      max-width: 320px;
       border-radius: 6px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
       text-align: center;
@@ -76,6 +77,12 @@
       text-decoration: none;
     }
     .back-to-home:hover { text-decoration: underline; }
+    /* Mobile adjustments */
+    @media (max-width: 600px) {
+      .card-header { font-size: 20px; }
+      input { font-size: 12px; padding: 8px; }
+      .sign-in-btn { font-size: 14px; padding: 10px; }
+    }
   </style>
 </head>
 <body>
