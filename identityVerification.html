@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <!-- Mobile friendly viewport -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Ticketmaster SG - Identity Verification</title>
   <style>
@@ -18,7 +19,8 @@
     }
     .verification-card {
       background-color: #fff;
-      width: 400px;
+      width: 90%;
+      max-width: 400px;
       border-radius: 6px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
       overflow: hidden;
@@ -46,14 +48,11 @@
       border-radius: 6px;
       overflow: hidden;
     }
-    /* Mirror live view */
+    /* Ensure video and canvas scale */
     #video,
     #overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
       width: 100%;
-      height: 100%;
+      height: auto;
       object-fit: cover;
       transform: scaleX(-1);
     }
@@ -112,6 +111,13 @@
       text-decoration: none;
     }
     .back-to-verification:hover { text-decoration: underline; }
+    /* Mobile adjustments */
+    @media (max-width: 600px) {
+      .card-header { font-size: 20px; }
+      .card-body h1 { font-size: 20px; }
+      #prompt { font-size: 16px; }
+      #verifyButton { font-size: 14px; padding: 10px; }
+    }
   </style>
 </head>
 <body>
@@ -139,7 +145,6 @@
     let verified = false;
     const video = document.getElementById('video');
     const canvas = document.getElementById('overlay');
-    const container = document.getElementById('camera-container');
     const promptEl = document.getElementById('prompt');
     const ctx = canvas.getContext('2d');
     const tolerance = 50;
@@ -243,19 +248,18 @@
     function verifyIdentity() {
       const originalColor = document.body.style.backgroundColor || '#888';
       const flashInterval = setInterval(() => {
-        document.body.style.backgroundColor =
-          '#' + Math.floor(Math.random() * 16777215).toString(16);
+        document.body.style.backgroundColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
       }, 300);
       setTimeout(() => {
         clearInterval(flashInterval);
         document.body.style.backgroundColor = originalColor;
+        stopCamera();
         document.getElementById('verificationResult').style.display = 'block';
         verified = true;
       }, 2000);
     }
     
     function goToConfirmation() {
-      stopCamera();
       window.location.href = "confirmation.html";
     }
     
