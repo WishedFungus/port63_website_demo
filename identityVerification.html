@@ -5,7 +5,7 @@
   <!-- Mobile friendly viewport -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Ticketmaster SG - Identity Verification</title>
-  <!-- Load face-api.js for fallback (if native FaceDetector is not available) -->
+  <!-- Load face-api.js for fallback detection -->
   <script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -50,9 +50,8 @@
       border-radius: 6px;
       overflow: hidden;
     }
-    /* Ensure video and canvas scale */
-    #video,
-    #overlay {
+    /* Ensure video and canvas scale responsively */
+    #video, #overlay {
       width: 100%;
       height: auto;
       object-fit: cover;
@@ -152,10 +151,10 @@
     const ctx = canvas.getContext('2d');
     const tolerance = 50;
     
-    // Function using native FaceDetector if available
+    // --- Native FaceDetector Approach ---
     function detectFacesNative() {
-      const faceDetector = new FaceDetector({ fastMode: true, maxDetectedFaces: 1 });
-      faceDetector.detect(video)
+      const detector = new FaceDetector({ fastMode: true, maxDetectedFaces: 1 });
+      detector.detect(video)
         .then(faces => {
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           if (faces.length > 0) {
@@ -174,13 +173,9 @@
             const areaRatio = faceArea / canvasArea;
             let instruction = "";
             if (Math.abs(dx) < tolerance && Math.abs(dy) < tolerance) {
-              if (areaRatio < 0.25) {
-                instruction = "Face centered but too small – move closer.";
-              } else if (areaRatio > 0.35) {
-                instruction = "Face centered but too big – move further.";
-              } else {
-                instruction = "Face centered!";
-              }
+              if (areaRatio < 0.25) instruction = "Face centered but too small – move closer.";
+              else if (areaRatio > 0.35) instruction = "Face centered but too big – move further.";
+              else instruction = "Face centered!";
             } else {
               if (dx > tolerance) instruction += "Move right. ";
               if (dx < -tolerance) instruction += "Move left. ";
@@ -196,122 +191,10 @@
           }
         })
         .catch(err => {
-          console.error("Face detection error:", err);
+          console.error("Native face detection error:", err);
           promptEl.innerText = "Error detecting face";
           verifyButton.disabled = true;
         })
         .finally(() => {
           requestAnimationFrame(detectFacesNative);
-        });
-    }
-    
-    // Fallback using face-api.js
-    async function loadFaceApiModels() {
-      // Load TinyFaceDetector model from a CDN-hosted URL
-      await faceapi.nets.tinyFaceDetector.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models/');
-    }
-    
-    async function detectFaceFallback() {
-      const options = new faceapi.TinyFaceDetectorOptions();
-      const result = await faceapi.detectSingleFace(video, options);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      if (result) {
-        const faceBox = result.box;
-        ctx.strokeStyle = 'yellow';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(faceBox.x, faceBox.y, faceBox.width, faceBox.height);
-        const faceCenterX = faceBox.x + faceBox.width / 2;
-        const faceCenterY = faceBox.y + faceBox.height / 2;
-        const canvasCenterX = canvas.width / 2;
-        const canvasCenterY = canvas.height / 2;
-        const dx = canvasCenterX - faceCenterX;
-        const dy = canvasCenterY - faceCenterY;
-        const faceArea = faceBox.width * faceBox.height;
-        const canvasArea = canvas.width * canvas.height;
-        const areaRatio = faceArea / canvasArea;
-        let instruction = "";
-        if (Math.abs(dx) < tolerance && Math.abs(dy) < tolerance) {
-          if (areaRatio < 0.25) {
-            instruction = "Face centered but too small – move closer.";
-          } else if (areaRatio > 0.35) {
-            instruction = "Face centered but too big – move further.";
-          } else {
-            instruction = "Face centered!";
-          }
-        } else {
-          if (dx > tolerance) instruction += "Move right. ";
-          if (dx < -tolerance) instruction += "Move left. ";
-          if (dy > tolerance) instruction += "Move down. ";
-          if (dy < -tolerance) instruction += "Move up. ";
-        }
-        promptEl.innerText = instruction;
-        verifyButton.disabled = !(Math.abs(dx) < tolerance && Math.abs(dy) < tolerance &&
-                                    areaRatio >= 0.25 && areaRatio <= 0.35);
-      } else {
-        promptEl.innerText = "No face detected";
-        verifyButton.disabled = true;
-      }
-      requestAnimationFrame(detectFaceFallback);
-    }
-    
-    // Start the camera
-    function startCamera() {
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ video: true })
-          .then(str => {
-            video.srcObject = str;
-            video.play();
-          })
-          .catch(err => {
-            console.error("Camera error:", err);
-            promptEl.innerText = "Unable to access camera.";
-          });
-      } else {
-        promptEl.innerText = "Camera not supported.";
-      }
-      video.addEventListener('playing', () => {
-        const vw = video.videoWidth || 640;
-        const vh = video.videoHeight || 480;
-        canvas.width = vw;
-        canvas.height = vh;
-      });
-    }
-    
-    function stopCamera() {
-      const stream = video.srcObject;
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-        video.srcObject = null;
-      }
-    }
-    
-    // Choose which detection method to use based on browser support
-    startCamera();
-    if ('FaceDetector' in window) {
-      requestAnimationFrame(detectFacesNative);
-    } else {
-      // Fallback: load face-api models and use them
-      loadFaceApiModels().then(() => {
-        requestAnimationFrame(detectFaceFallback);
-      });
-    }
-    
-    function verifyIdentity() {
-      const originalColor = document.body.style.backgroundColor || '#888';
-      const flashInterval = setInterval(() => {
-        document.body.style.backgroundColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
-      }, 300);
-      setTimeout(() => {
-        clearInterval(flashInterval);
-        document.body.style.backgroundColor = originalColor;
-        stopCamera();
-        document.getElementById('verificationResult').style.display = 'block';
-      }, 2000);
-    }
-    
-    function goToConfirmation() {
-      window.location.href = "confirmation.html";
-    }
-  </script>
-</body>
-</html>
+  
