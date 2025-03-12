@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <!-- Mobile viewport -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ticketmaster SG - Verification</title>
   <style>
@@ -18,7 +19,8 @@
     }
     .verification-card {
       background-color: #fff;
-      width: 350px;
+      width: 90%;
+      max-width: 350px;
       border-radius: 6px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
       overflow: hidden;
@@ -70,6 +72,13 @@
       text-decoration: none;
     }
     .back-to-registration a:hover { text-decoration: underline; }
+    /* Mobile adjustments */
+    @media (max-width: 600px) {
+      .card-header { font-size: 20px; }
+      .card-body h1 { font-size: 20px; }
+      .code-input-container input { width: 40px; height: 40px; font-size: 20px; }
+      button { font-size: 14px; padding: 10px; }
+    }
   </style>
 </head>
 <body>
