@@ -62,12 +62,12 @@
     /* TAB CONTENT */
     .tab-content { display: none; }
     .tab-content.active { display: block; }
-    /* ACCOUNT TAB */
+    /* Account Tab */
     .account-details label { display: block; font-weight: bold; margin-top: 10px; }
     .account-details span { display: block; margin-bottom: 10px; font-size: 15px; }
     .reset-password { display: inline-block; margin-top: 10px; font-size: 14px; color: #0071ce; text-decoration: none; }
     .reset-password:hover { text-decoration: underline; }
-    /* WALLET TAB */
+    /* Wallet Tab */
     .wallet-card {
       background-color: #f9f9f9;
       border: 1px solid #ddd;
@@ -78,7 +78,7 @@
       text-align: center;
     }
     .wallet-card h3 { margin-bottom: 10px; color: #0071ce; }
-    /* MY TICKETS TAB */
+    /* My Tickets Tab */
     .ticket-card {
       display: flex;
       border: 1px solid #eee;
@@ -103,23 +103,112 @@
       flex-direction: column;
       justify-content: center;
     }
-    .ticket-info h3 {
-      margin-bottom: 5px;
-      font-size: 18px;
+    .ticket-info h3 { margin-bottom: 5px; font-size: 18px; }
+    .ticket-info p { margin: 2px 0; font-size: 14px; color: #555; }
+    .ticket-prompt { font-size: 12px; color: #0071ce; text-align: right; margin-top: auto; }
+    /* Buyer Flow (Buy From Tab) */
+    .buy-from-flow { margin-top: 20px; }
+    .buy-from-flow .page { display: none; }
+    .buy-from-flow .page.active { display: block; }
+    .buy-from-flow .container {
+      background-color: #fff;
+      width: 90%;
+      max-width: 800px;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      text-align: center;
+      margin: 20px auto;
     }
-    .ticket-info p {
-      margin: 2px 0;
+    .buy-from-flow h2 { font-size: 24px; margin-bottom: 20px; color: #0071ce; }
+    .buy-from-flow p { font-size: 16px; margin-bottom: 15px; }
+    .terms-box {
+      background-color: #e0e0e0;
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 15px;
       font-size: 14px;
-      color: #555;
+      color: #333;
     }
-    .ticket-prompt {
-      font-size: 12px;
-      color: #0071ce;
-      text-align: right;
-      margin-top: auto;
+    #buy-termsPage .container,
+    #buy-homePage .container { max-width: 650px; }
+    #buyCodeInputs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
     }
-    /* BUYER & SELLER FLOW SECTIONS (omitted here for brevity—they remain unchanged) */
-    /* ... */
+    .buy-code {
+      width: 40px;
+      height: 40px;
+      text-align: center;
+      font-size: 24px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .price-summary-box {
+      background: #f7f7f7;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    /* Seller Flow (Sell To Tab) */
+    .sell-flow { margin-top: 20px; }
+    .sell-flow .page { display: none; }
+    .sell-flow .page.active { display: block; }
+    .sell-flow .container {
+      background-color: #fff;
+      width: 90%;
+      max-width: 800px;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      text-align: center;
+      margin: 20px auto;
+    }
+    .sell-flow h2 { font-size: 24px; margin-bottom: 20px; color: #0071ce; }
+    .sell-flow p { font-size: 16px; margin-bottom: 15px; }
+    #sellerCodeDisplay .code-box {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      line-height: 40px;
+      border: 1px solid #ccc;
+      margin: 0 5px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      background: #f9f9f9;
+    }
+    #sellerTimer { font-size: 16px; margin-top: 10px; }
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      margin: 15px 10px;
+      background-color: #0071ce;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    .btn:hover:not(:disabled) { background-color: #005c9e; }
+    .back-btn {
+      background-color: #ccc;
+      color: #333;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .back-btn:hover { background-color: #bbb; }
     /* Footer */
     .powered-by {
       text-align: center;
@@ -131,6 +220,7 @@
     @media (max-width: 768px) {
       .dashboard-container { flex-direction: column; }
       .sidebar { width: 100%; text-align: center; }
+      .buy-from-flow .container, .sell-flow .container { max-width: 90%; }
     }
   </style>
 </head>
@@ -178,7 +268,6 @@
       <!-- My Tickets Tab -->
       <div id="tab-my-tickets" class="tab-content">
         <h1>My Tickets</h1>
-        <!-- Ticket Cards (same as original) -->
         <div class="ticket-card">
           <img src="https://picsum.photos/seed/ticket1/200/150" alt="Rock Concert 2025">
           <div class="ticket-details">
@@ -191,10 +280,246 @@
             <p class="ticket-prompt">click to view ticket</p>
           </div>
         </div>
-        <!-- More ticket cards... -->
+        <div class="ticket-card">
+          <img src="https://picsum.photos/seed/ticket2/200/150" alt="Jazz Night">
+          <div class="ticket-details">
+            <div class="ticket-info">
+              <h3>Jazz Night</h3>
+              <p>Date: 10 Jul 2025</p>
+              <p>Time: 7:30 PM</p>
+              <p>Seat: Section B</p>
+            </div>
+            <p class="ticket-prompt">click to view ticket</p>
+          </div>
+        </div>
+        <div class="ticket-card">
+          <img src="https://picsum.photos/seed/ticket3/200/150" alt="Comedy Show">
+          <div class="ticket-details">
+            <div class="ticket-info">
+              <h3>Comedy Show</h3>
+              <p>Date: 15 Aug 2025</p>
+              <p>Time: 9:00 PM</p>
+              <p>Seat: Section C</p>
+            </div>
+            <p class="ticket-prompt">click to view ticket</p>
+          </div>
+        </div>
       </div>
-      <!-- Buy From & Sell To Tabs (omitted here for brevity—they remain unchanged) -->
-      <!-- ... -->
+      <!-- Buy From Tab (Buyer Flow) -->
+      <div id="tab-buy-from" class="tab-content">
+        <h1>Buy Tickets</h1>
+        <div id="buyerFlow" class="buy-from-flow">
+          <!-- Buyer Flow: Page 1 – Terms and Conditions -->
+          <div id="buy-termsPage" class="page active">
+            <div class="container">
+              <h2>Terms and Conditions</h2>
+              <div class="terms-box">
+                You will need to pay a 5% transaction fee as a buyer.
+              </div>
+              <div style="margin-bottom:20px; text-align:center;">
+                <input type="checkbox" id="buyerTermsCheckbox">
+                <label for="buyerTermsCheckbox">I agree to the terms and conditions</label>
+              </div>
+              <button class="btn" id="buyerContinueBtn" disabled>Continue</button>
+            </div>
+          </div>
+          <!-- Buyer Flow: Page 2 – Enter Seller Code -->
+          <div id="buy-homePage" class="page">
+            <div class="container">
+              <h2>Enter Seller Code</h2>
+              <div id="buyCodeInputs">
+                <input type="text" class="buy-code" maxlength="1">
+                <input type="text" class="buy-code" maxlength="1">
+                <input type="text" class="buy-code" maxlength="1">
+                <input type="text" class="buy-code" maxlength="1">
+                <input type="text" class="buy-code" maxlength="1">
+                <input type="text" class="buy-code" maxlength="1">
+              </div>
+              <div style="display:flex; justify-content: space-between;">
+                <button class="btn back-btn" id="buyerBackBtn">Back</button>
+                <button class="btn" id="buyerConfirmBtn">Buy</button>
+              </div>
+            </div>
+          </div>
+          <!-- Buyer Flow: Page 3 – Buyer Summary -->
+          <div id="buyerSummaryPage" class="page">
+            <div class="container">
+              <h2>Summary</h2>
+              <p id="buyerSummaryTicketDetail" class="prominentDetail"></p>
+              <div id="buyerPriceSummary" class="price-summary-box"></div>
+              <div style="display:flex; justify-content: space-between;">
+                <button class="btn back-btn" id="buyerSummaryBackBtn">Back</button>
+                <button class="btn" id="buyerProceedToPaymentBtn">Proceed to Payment</button>
+              </div>
+            </div>
+          </div>
+          <!-- Buyer Flow: Page 4 – Payment -->
+          <div id="buyerPaymentPage" class="page">
+            <div class="container">
+              <h2>Payment</h2>
+              <form id="buyerPaymentForm">
+                <div style="margin-bottom:10px; text-align:left;">
+                  <label for="buyerCardNumber">Card Number</label><br>
+                  <input type="text" id="buyerCardNumber" name="buyerCardNumber" placeholder="1234 5678 9012 3456" maxlength="19" style="width:100%; padding:8px;">
+                </div>
+                <div style="margin-bottom:10px; text-align:left;">
+                  <label for="buyerCardHolder">Card Holder Name</label><br>
+                  <input type="text" id="buyerCardHolder" name="buyerCardHolder" placeholder="John Doe" style="width:100%; padding:8px;">
+                </div>
+                <div style="margin-bottom:10px; text-align:left;">
+                  <label for="buyerExpiryDate">Expiry Date (MM/YY)</label><br>
+                  <input type="text" id="buyerExpiryDate" name="buyerExpiryDate" placeholder="MM/YY" maxlength="5" style="width:100%; padding:8px;">
+                </div>
+                <div style="margin-bottom:10px; text-align:left;">
+                  <label for="buyerCVV">CVV</label><br>
+                  <input type="text" id="buyerCVV" name="buyerCVV" placeholder="123" maxlength="3" style="width:100%; padding:8px;">
+                </div>
+                <div style="display:flex; justify-content: space-between;">
+                  <button class="btn back-btn" type="button" id="buyerPaymentBackBtn">Back</button>
+                  <button class="btn" type="submit" id="buyerPayBtn">Pay</button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <!-- Buyer Flow: Page 5 – Thank You -->
+          <div id="buyerThankYouPage" class="page">
+            <div class="container">
+              <h2>Thank You</h2>
+              <p style="font-size:16px; margin-bottom:20px;">
+                Thank you! Your purchase is complete and details have been emailed to you.
+              </p>
+              <button class="btn" id="buyerBackToHomeBtn">Back to Home</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Sell To Tab (Seller Flow) -->
+      <div id="tab-sell-to" class="tab-content">
+        <h1>Sell Tickets</h1>
+        <div id="sellerFlow" class="sell-flow">
+          <!-- Seller Flow: Page 1 – Terms and Conditions -->
+          <div id="sell-termsPage" class="page active">
+            <div class="container">
+              <h2>Terms and Conditions</h2>
+              <div class="terms-box">
+                When selling, 5% of the ticket price will be deducted.
+              </div>
+              <div style="margin-bottom:20px; text-align:center;">
+                <input type="checkbox" id="sellerTermsCheckbox">
+                <label for="sellerTermsCheckbox">I agree to the terms and conditions</label>
+              </div>
+              <button class="btn" id="sellerContinueBtn" disabled>Continue</button>
+            </div>
+          </div>
+          <!-- Seller Flow: Page 2 – Sell Options -->
+          <div id="sellerHomePage" class="page">
+            <div class="container">
+              <h2>Sell Options</h2>
+              <div style="display: flex; flex-direction: column; gap: 15px;">
+                <div>
+                  <button class="btn" id="sellerPersonBtn">Sell to Someone</button>
+                  <p style="font-size: 12px; color: #555; margin-top: 5px;">
+                    Click this button if you are selling to a specific person
+                  </p>
+                </div>
+                <hr style="border: none; height: 1px; background: #000; margin: 10px 0;">
+                <div>
+                  <button class="btn" id="sellerMarketplaceBtn">Sell via Marketplace</button>
+                  <p style="font-size: 12px; color: #555; margin-top: 5px;">
+                    Click this button if you would like to just sell your ticket
+                  </p>
+                </div>
+              </div>
+              <button class="btn back-btn" id="sellerBackBtn" style="margin-top: 80px;">Back</button>
+            </div>
+          </div>
+          <!-- Seller Flow: Page 3 – Select Ticket -->
+          <div id="sellerSelectTicketPage" class="page">
+            <div class="container">
+              <h2>Select Ticket</h2>
+              <select id="sellerConcertSelect">
+                <option value="">Select a concert</option>
+                <option value="RockFest | 2025-06-21">RockFest | 2025-06-21</option>
+                <option value="Jazz Night | 2025-07-10">Jazz Night | 2025-07-10</option>
+                <option value="Pop Extravaganza | 2025-08-15">Pop Extravaganza | 2025-08-15</option>
+                <option value="Classical Evenings | 2025-09-05">Classical Evenings | 2025-09-05</option>
+              </select>
+              <div id="sellerTicketDetails" class="prominentDetail"></div>
+              <div style="display:flex; justify-content: space-between; margin-top:20px;">
+                <button class="btn back-btn" id="sellerSelectTicketBackBtn">Back</button>
+                <button class="btn" id="sellerProceedBtn">Proceed</button>
+              </div>
+            </div>
+          </div>
+          <!-- Seller Flow: Page 4 – Person Summary Page -->
+          <div id="sellerPersonSummaryPage" class="page">
+            <div class="container">
+              <h2>Summary</h2>
+              <p id="sellerPersonSummaryTicketDetail" class="prominentDetail"></p>
+              <div id="sellerPriceSummary" class="price-summary-box"></div>
+              <div style="display:flex; justify-content: space-between;">
+                <button class="btn back-btn" id="sellerPersonSummaryBackBtn">Back</button>
+                <button class="btn" id="sellerProceedToGenCodeBtn">Proceed to Generate Code</button>
+              </div>
+            </div>
+          </div>
+          <!-- Seller Flow: Page 5 – Generate Code Page -->
+          <div id="sellerGenerateCodePage" class="page">
+            <div class="container">
+              <h2>Generate Code</h2>
+              <p id="sellerSelectedConcertDetail" class="prominentDetail"></p>
+              <p id="sellerCodeInstruction" style="font-size:16px; margin-bottom:10px;">
+                Ensure you are ready to sell; once the code is used, the ticket will be locked for 24 hours.
+              </p>
+              <div id="sellerCodeCheckboxContainer" style="margin-bottom:20px;">
+                <input type="checkbox" id="sellerTermsCheckbox2">
+                <label for="sellerTermsCheckbox2">I understand the terms and conditions</label>
+              </div>
+              <div id="sellerCodeDisplay">
+                <span class="code-box"></span>
+                <span class="code-box"></span>
+                <span class="code-box"></span>
+                <span class="code-box"></span>
+                <span class="code-box"></span>
+                <span class="code-box"></span>
+              </div>
+              <p id="sellerTimer">Time left: 05:00</p>
+              <button class="btn" id="sellerGenerateCodeBtn" disabled>Generate Code</button>
+              <div style="display:flex; justify-content: space-between; margin-top:20px;">
+                <button class="btn back-btn" id="sellerGenCodeBackBtn">Back</button>
+                <button class="btn" id="sellerFinishBtn">Finish</button>
+              </div>
+            </div>
+          </div>
+          <!-- Seller Flow: Page 6 – Marketplace Summary Page -->
+          <div id="sellerSummaryPage" class="page">
+            <div class="container">
+              <h2>Summary</h2>
+              <p id="sellerSummaryTicketDetail" class="prominentDetail"></p>
+              <div id="sellerMarketplacePriceSummary" class="price-summary-box"></div>
+              <p class="warning" style="font-size:14px; color:#a00; margin-bottom:10px;">
+                Warning: This action is final.
+              </p>
+              <div style="margin-bottom:20px; text-align:center;">
+                <input type="checkbox" id="sellerSummaryTermsCheckbox">
+                <label for="sellerSummaryTermsCheckbox">I understand the terms and conditions</label>
+              </div>
+              <div style="display:flex; justify-content: space-between;">
+                <button class="btn back-btn" id="sellerSummaryBackBtn">Back</button>
+                <button class="btn" id="sellerConfirmSellBtn" disabled>Confirm Sell To Marketplace</button>
+              </div>
+            </div>
+          </div>
+          <!-- Seller Flow: Page 7 – Thank You Page -->
+          <div id="sellerThankYouPage" class="page">
+            <div class="container">
+              <h2>Thank You</h2>
+              <p>You have successfully sold your ticket. A confirmation email has been sent.</p>
+              <button class="btn back-btn" id="sellerBackToHomeBtn">Back to Home</button>
+            </div>
+          </div>
+        </div>
+      </div>
       <!-- Footer -->
       <footer class="powered-by">Powered by Genuitix</footer>
     </div>
@@ -213,16 +538,290 @@
         if(tabToShow) { tabToShow.classList.add('active'); }
       });
     });
-    
-    // On page load, check URL hash to activate the correct tab
     window.addEventListener("load", function() {
       const hash = window.location.hash;
       if (hash) {
         const targetTab = document.querySelector(`.sidebar li[data-tab="${hash.replace('#tab-', '')}"]`);
-        if (targetTab) {
-          targetTab.click();
-        }
+        if (targetTab) { targetTab.click(); }
       }
+    });
+  </script>
+  
+  <script>
+    // Ticket click functionality for My Tickets tab
+    const ticketData = [
+      { eventName: "Rock Concert 2025", eventDate: "21 Jun 2025", eventTime: "8:00 PM", seatSection: "Section A" },
+      { eventName: "Jazz Night", eventDate: "10 Jul 2025", eventTime: "7:30 PM", seatSection: "Section B" },
+      { eventName: "Comedy Show", eventDate: "15 Aug 2025", eventTime: "9:00 PM", seatSection: "Section C" }
+    ];
+    document.querySelectorAll('.ticket-card').forEach((card, index) => {
+      card.addEventListener('click', function() {
+        localStorage.setItem('ticketDetails', JSON.stringify(ticketData[index]));
+        window.location.href = "ticketDetails.html";
+      });
+    });
+  </script>
+  
+  <script>
+    /* =================== BUYER FLOW =================== */
+    let buyerTicketPrice = 0;
+    let buyerConcertID = "";
+    let buyerGeneratedCodes = {};
+    let buyerTimerInterval;
+    const buyerTermsCheckbox = document.getElementById('buyerTermsCheckbox');
+    const buyerContinueBtn = document.getElementById('buyerContinueBtn');
+    buyerTermsCheckbox.addEventListener('change', function() {
+      buyerContinueBtn.disabled = !this.checked;
+    });
+    buyerContinueBtn.addEventListener('click', function() {
+      showBuyerFlowPage('buy-homePage');
+    });
+    document.querySelectorAll('#buyCodeInputs .buy-code').forEach((input, index, arr) => {
+      input.addEventListener('input', () => {
+        if(input.value.length === input.maxLength && index < arr.length - 1) {
+          arr[index + 1].focus();
+        }
+      });
+    });
+    const buyInputs = document.querySelectorAll('#buyCodeInputs .buy-code');
+    document.getElementById('buyerBackBtn').addEventListener('click', function() {
+      showBuyerFlowPage('buy-termsPage');
+    });
+    document.getElementById('buyerConfirmBtn').addEventListener('click', function() {
+      let buyerCode = "";
+      buyInputs.forEach(input => { buyerCode += input.value.toUpperCase(); });
+      if(buyerCode.length !== 6) {
+        alert("Please enter the complete 6-character code.");
+        return;
+      }
+      buyerTicketPrice = 100; 
+      let fee = buyerTicketPrice * 0.05;
+      let totalCost = buyerTicketPrice + fee;
+      document.getElementById('buyerPriceSummary').innerHTML =
+        `Ticket Price: $${buyerTicketPrice.toFixed(2)}<br>Transaction Fee (5%): $${fee.toFixed(2)}<br>Total Cost: $${totalCost.toFixed(2)}`;
+      document.getElementById('buyerSummaryTicketDetail').textContent = "Selected Ticket: Demo Ticket";
+      showBuyerFlowPage('buyerSummaryPage');
+    });
+    document.getElementById('buyerSummaryBackBtn').addEventListener('click', function() {
+      showBuyerFlowPage('buy-homePage');
+    });
+    document.getElementById('buyerProceedToPaymentBtn').addEventListener('click', function() {
+      showBuyerFlowPage('buyerPaymentPage');
+    });
+    document.getElementById('buyerPaymentBackBtn').addEventListener('click', function() {
+      showBuyerFlowPage('buyerSummaryPage');
+    });
+    document.getElementById('buyerPaymentForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      showBuyerFlowPage('buyerThankYouPage');
+    });
+    document.getElementById('buyerBackToHomeBtn').addEventListener('click', function(){
+      document.querySelectorAll('#buyerFlow input').forEach(input => input.value = "");
+      document.getElementById('buyerTermsCheckbox').checked = false;
+      showBuyerFlowPage('buy-termsPage');
+    });
+    function showBuyerFlowPage(pageId) {
+      document.querySelectorAll('.buy-from-flow .page').forEach(p => p.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+    }
+    
+    /* =================== SELLER FLOW =================== */
+    let sellerTicket = "";
+    let sellerTicketPrice = 0;
+    let sellerConcertID = "";
+    let sellerGeneratedCodes = {};
+    let sellerTimerInterval;
+    let sellerMethod = "";
+    const sellerTermsCheckbox = document.getElementById('sellerTermsCheckbox');
+    const sellerContinueBtn = document.getElementById('sellerContinueBtn');
+    sellerTermsCheckbox.addEventListener('change', function() {
+      sellerContinueBtn.disabled = !this.checked;
+    });
+    sellerContinueBtn.addEventListener('click', function() {
+      showSellerFlowPage('sellerHomePage');
+    });
+    document.getElementById('sellerBackBtn').addEventListener('click', function() {
+      showSellerFlowPage('sell-termsPage');
+    });
+    document.getElementById('sellerPersonBtn').addEventListener('click', function() {
+      sellerMethod = "person";
+      showSellerFlowPage('sellerSelectTicketPage');
+    });
+    document.getElementById('sellerMarketplaceBtn').addEventListener('click', function() {
+      sellerMethod = "marketplace";
+      showSellerFlowPage('sellerSelectTicketPage');
+    });
+    const sellerConcertSelect = document.getElementById('sellerConcertSelect');
+    const sellerTicketDetailsDiv = document.getElementById('sellerTicketDetails');
+    const sellerConcertDetails = {
+      "RockFest | 2025-06-21": "RockFest, Section A, $120",
+      "Jazz Night | 2025-07-10": "Jazz Night, Section B, $100",
+      "Pop Extravaganza | 2025-08-15": "Pop Extravaganza, Section C, $150",
+      "Classical Evenings | 2025-09-05": "Classical Evenings, Section D, $80"
+    };
+    sellerConcertSelect.addEventListener('change', function() {
+      const selected = sellerConcertSelect.value;
+      if(selected && sellerConcertDetails[selected]) {
+        let parts = sellerConcertDetails[selected].split(',');
+        let ticketInfo = parts[0] + ", " + parts[1].trim();
+        sellerTicketDetailsDiv.textContent = ticketInfo;
+      } else {
+        sellerTicketDetailsDiv.textContent = "";
+      }
+    });
+    document.getElementById('sellerProceedBtn').addEventListener('click', function() {
+      if(!sellerConcertSelect.value) {
+        alert("Please select a concert first.");
+        return;
+      }
+      sellerConcertID = sellerConcertSelect.value;
+      let detail = sellerConcertDetails[sellerConcertID];
+      let parts = detail.split(',');
+      sellerTicket = sellerConcertID + " - " + parts[0] + ", " + parts[1].trim();
+      let priceMatch = detail.match(/\\$(\\d+(\\.\\d+)?)/);
+      if(priceMatch) {
+        sellerTicketPrice = parseFloat(priceMatch[1]);
+      }
+      if(sellerMethod === "person") {
+        document.getElementById('sellerPersonSummaryTicketDetail').textContent = "Selected Ticket: " + sellerTicket;
+        let fee = sellerTicketPrice * 0.05;
+        let net = sellerTicketPrice - fee;
+        document.getElementById('sellerPriceSummary').innerHTML =
+          `Ticket Price: $${sellerTicketPrice.toFixed(2)}<br>Transaction Fee (5%): $${fee.toFixed(2)}<br>Net Amount Returned: $${net.toFixed(2)}`;
+        showSellerFlowPage('sellerPersonSummaryPage');
+      } else if(sellerMethod === "marketplace") {
+        document.getElementById('sellerSummaryTicketDetail').textContent = "Selected Ticket: " + sellerTicket;
+        let fee = sellerTicketPrice * 0.05;
+        let net = sellerTicketPrice - fee;
+        document.getElementById('sellerMarketplacePriceSummary').innerHTML =
+          `Ticket Price: $${sellerTicketPrice.toFixed(2)}<br>Transaction Fee (5%): $${fee.toFixed(2)}<br>Net Amount Returned: $${net.toFixed(2)}`;
+        showSellerFlowPage('sellerSummaryPage');
+      }
+    });
+    document.getElementById('sellerSelectTicketBackBtn').addEventListener('click', function() {
+      showSellerFlowPage('sellerHomePage');
+    });
+    document.getElementById('sellerProceedToGenCodeBtn').addEventListener('click', function() {
+      showSellerFlowPage('sellerGenerateCodePage');
+    });
+    document.getElementById('sellerPersonSummaryBackBtn').addEventListener('click', function() {
+      showSellerFlowPage('sellerSelectTicketPage');
+    });
+    const sellerTermsCheckbox2 = document.getElementById('sellerTermsCheckbox2');
+    const sellerGenerateCodeBtn = document.getElementById('sellerGenerateCodeBtn');
+    sellerTermsCheckbox2.addEventListener('change', function() {
+      if(!sellerGeneratedCodeExists()) {
+        sellerGenerateCodeBtn.disabled = !this.checked;
+      }
+    });
+    document.getElementById('sellerGenCodeBackBtn').addEventListener('click', function() {
+      sellerTermsCheckbox2.checked = false;
+      sellerTermsCheckbox2.disabled = false;
+      sellerGenerateCodeBtn.disabled = true;
+      showSellerFlowPage('sellerPersonSummaryPage');
+    });
+    document.getElementById('sellerFinishBtn').addEventListener('click', function() {
+      showSellerFlowPage('sellerThankYouPage');
+    });
+    function sellerGeneratedCodeExists() {
+      return (sellerConcertID in sellerGeneratedCodes) && (sellerGeneratedCodes[sellerConcertID].expiresAt > Date.now());
+    }
+    function sellerDisplayCode() {
+      if(sellerGeneratedCodeExists()) {
+        const codeObj = sellerGeneratedCodes[sellerConcertID];
+        const boxes = document.querySelectorAll('#sellerCodeDisplay .code-box');
+        boxes.forEach((box, i) => { box.textContent = codeObj.code[i]; });
+        sellerGenerateCodeBtn.disabled = true;
+        document.getElementById('sellerCodeCheckboxContainer').style.display = "none";
+        document.getElementById('sellerCodeInstruction').textContent = "A code has already been generated for this ticket. Please wait for it to expire before generating a new one.";
+        updateSellerTimerDisplay(Math.floor((codeObj.expiresAt - Date.now()) / 1000));
+        sellerTimerInterval = setInterval(function(){
+          const remaining = Math.floor((codeObj.expiresAt - Date.now()) / 1000);
+          updateSellerTimerDisplay(remaining);
+          if(remaining <= 0){
+            clearInterval(sellerTimerInterval);
+            delete sellerGeneratedCodes[sellerConcertID];
+            sellerResetGenerateCodePage();
+          }
+        }, 1000);
+        return;
+      }
+      const code = sellerGenerateRandomCode();
+      const expiresAt = Date.now() + 300000;
+      sellerGeneratedCodes[sellerConcertID] = { code, expiresAt };
+      const boxes = document.querySelectorAll('#sellerCodeDisplay .code-box');
+      boxes.forEach((box, i) => { box.textContent = code[i]; });
+      sellerGenerateCodeBtn.disabled = true;
+      document.getElementById('sellerCodeCheckboxContainer').style.display = "none";
+      document.getElementById('sellerCodeInstruction').textContent = "A code has been generated. Please wait for it to expire.";
+      updateSellerTimerDisplay(Math.floor((expiresAt - Date.now()) / 1000));
+      sellerTimerInterval = setInterval(function(){
+        const remaining = Math.floor((expiresAt - Date.now()) / 1000);
+        updateSellerTimerDisplay(remaining);
+        if(remaining <= 0){
+          clearInterval(sellerTimerInterval);
+          delete sellerGeneratedCodes[sellerConcertID];
+          sellerResetGenerateCodePage();
+        }
+      }, 1000);
+    }
+    function sellerResetGenerateCodePage() {
+      document.getElementById('sellerCodeCheckboxContainer').style.display = "block";
+      sellerTermsCheckbox2.checked = false;
+      sellerTermsCheckbox2.disabled = false;
+      sellerGenerateCodeBtn.disabled = true;
+      document.getElementById('sellerCodeInstruction').textContent = "Ensure you are ready to sell; once the code is used, the ticket will be locked for 24 hours.";
+      sellerClearCode();
+    }
+    function sellerClearCode() {
+      document.querySelectorAll('#sellerCodeDisplay .code-box').forEach(box => { box.textContent = ""; });
+      document.getElementById('sellerTimer').textContent = "Time left: 05:00";
+    }
+    function sellerGenerateRandomCode() {
+      const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      let code = '';
+      for(let i = 0; i < 6; i++){
+        code += characters.charAt(Math.floor(Math.random() * characters.length));
+      }
+      return code;
+    }
+    function updateSellerTimerDisplay(seconds) {
+      const timerEl = document.getElementById('sellerTimer');
+      const minutes = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      timerEl.textContent = `Time left: ${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    document.getElementById('sellerGenerateCodeBtn').addEventListener('click', function(){
+      sellerDisplayCode();
+    });
+    document.getElementById('sellerSummaryTermsCheckbox').addEventListener('change', function() {
+      document.getElementById('sellerConfirmSellBtn').disabled = !this.checked;
+    });
+    document.getElementById('sellerConfirmSellBtn').addEventListener('click', function() {
+      showSellerFlowPage('sellerThankYouPage');
+    });
+    document.getElementById('sellerSummaryBackBtn').addEventListener('click', function() {
+      showSellerFlowPage('sellerSelectTicketPage');
+    });
+    document.getElementById('sellerBackToHomeBtn').addEventListener('click', function() {
+      sellerGeneratedCodes = {};
+      showSellerFlowPage('sell-termsPage');
+    });
+    function showSellerFlowPage(pageId) {
+      document.querySelectorAll('.sell-flow .page').forEach(p => p.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+    }
+    /* =================== VIEW TICKET HANDLERS =================== */
+    const ticketDataArr = [
+      { eventName: "Rock Concert 2025", eventDate: "21 Jun 2025", eventTime: "8:00 PM", seatSection: "Section A" },
+      { eventName: "Jazz Night", eventDate: "10 Jul 2025", eventTime: "7:30 PM", seatSection: "Section B" },
+      { eventName: "Comedy Show", eventDate: "15 Aug 2025", eventTime: "9:00 PM", seatSection: "Section C" }
+    ];
+    document.querySelectorAll('.ticket-card').forEach((card, index) => {
+      card.addEventListener('click', function() {
+        localStorage.setItem('ticketDetails', JSON.stringify(ticketDataArr[index]));
+        window.location.href = "ticketDetails.html";
+      });
     });
   </script>
 </body>
