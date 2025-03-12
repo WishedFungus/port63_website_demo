@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <!-- Mobile viewport -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ticket Details - Ticketmaster SG</title>
   <style>
@@ -18,7 +19,8 @@
     }
     .ticket-details-card {
       background-color: #fff;
-      width: 400px;
+      width: 90%;
+      max-width: 400px;
       border-radius: 6px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
       overflow: hidden;
@@ -65,6 +67,12 @@
       width: 100%;
     }
     .back-btn:hover { background-color: #ccc; }
+    /* Mobile adjustments */
+    @media (max-width: 600px) {
+      .card-header { font-size: 20px; }
+      .details { font-size: 14px; }
+      .btn, .back-btn { font-size: 14px; padding: 10px; }
+    }
   </style>
 </head>
 <body>
