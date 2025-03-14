@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <!-- Ensure mobile responsiveness -->
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Ticketmaster SG - Dashboard</title>
   <style>
@@ -33,7 +32,6 @@
     /* DASHBOARD LAYOUT */
     .dashboard-container {
       display: flex;
-      width: 90%;
       max-width: 1200px;
       margin: 0 auto;
     }
@@ -62,12 +60,12 @@
     /* TAB CONTENT */
     .tab-content { display: none; }
     .tab-content.active { display: block; }
-    /* Account Tab */
+    /* ACCOUNT TAB */
     .account-details label { display: block; font-weight: bold; margin-top: 10px; }
     .account-details span { display: block; margin-bottom: 10px; font-size: 15px; }
     .reset-password { display: inline-block; margin-top: 10px; font-size: 14px; color: #0071ce; text-decoration: none; }
     .reset-password:hover { text-decoration: underline; }
-    /* Wallet Tab */
+    /* WALLET TAB */
     .wallet-card {
       background-color: #f9f9f9;
       border: 1px solid #ddd;
@@ -78,7 +76,7 @@
       text-align: center;
     }
     .wallet-card h3 { margin-bottom: 10px; color: #0071ce; }
-    /* My Tickets Tab */
+    /* MY TICKETS TAB */
     .ticket-card {
       display: flex;
       border: 1px solid #eee;
@@ -103,16 +101,28 @@
       flex-direction: column;
       justify-content: center;
     }
-    .ticket-info h3 { margin-bottom: 5px; font-size: 18px; }
-    .ticket-info p { margin: 2px 0; font-size: 14px; color: #555; }
-    .ticket-prompt { font-size: 12px; color: #0071ce; text-align: right; margin-top: auto; }
-    /* Buyer Flow (Buy From Tab) */
+    .ticket-info h3 {
+      margin-bottom: 5px;
+      font-size: 18px;
+    }
+    .ticket-info p {
+      margin: 2px 0;
+      font-size: 14px;
+      color: #555;
+    }
+    .ticket-prompt {
+      font-size: 12px;
+      color: #0071ce;
+      text-align: right;
+      margin-top: auto;
+    }
+    /* -------------- BUY FROM FLOW (Buyer Flow) -------------- */
     .buy-from-flow { margin-top: 20px; }
     .buy-from-flow .page { display: none; }
     .buy-from-flow .page.active { display: block; }
     .buy-from-flow .container {
       background-color: #fff;
-      width: 90%;
+      width: 100%;
       max-width: 800px;
       padding: 30px;
       border-radius: 8px;
@@ -122,6 +132,7 @@
     }
     .buy-from-flow h2 { font-size: 24px; margin-bottom: 20px; color: #0071ce; }
     .buy-from-flow p { font-size: 16px; margin-bottom: 15px; }
+    /* TERMS BOX: Added style for light grey box */
     .terms-box {
       background-color: #e0e0e0;
       padding: 10px;
@@ -130,8 +141,10 @@
       font-size: 14px;
       color: #333;
     }
-    #buy-termsPage .container,
-    #buy-homePage .container { max-width: 650px; }
+    /* Buyer Flow: Page 1 – Terms and Conditions */
+    #buy-termsPage .container { width: 650px; }
+    /* Buyer Flow: Page 2 – Enter Seller Code */
+    #buy-homePage .container { width: 650px; }
     #buyCodeInputs {
       display: flex;
       justify-content: center;
@@ -156,13 +169,13 @@
       margin-bottom: 20px;
       text-align: center;
     }
-    /* Seller Flow (Sell To Tab) */
+    /* -------------- SELL TO FLOW (Seller Flow) -------------- */
     .sell-flow { margin-top: 20px; }
     .sell-flow .page { display: none; }
     .sell-flow .page.active { display: block; }
     .sell-flow .container {
       background-color: #fff;
-      width: 90%;
+      width: 100%;
       max-width: 800px;
       padding: 30px;
       border-radius: 8px;
@@ -172,6 +185,7 @@
     }
     .sell-flow h2 { font-size: 24px; margin-bottom: 20px; color: #0071ce; }
     .sell-flow p { font-size: 16px; margin-bottom: 15px; }
+    /* Seller Flow: Code Generation */
     #sellerCodeDisplay .code-box {
       display: inline-block;
       width: 40px;
@@ -185,12 +199,14 @@
       background: #f9f9f9;
     }
     #sellerTimer { font-size: 16px; margin-top: 10px; }
+    /* Button Styling */
     .btn {
       display: inline-block;
       padding: 10px 20px;
       margin: 15px 10px;
       background-color: #0071ce;
       color: #fff;
+      text-decoration: none;
       border: none;
       border-radius: 4px;
       cursor: pointer;
@@ -198,18 +214,30 @@
       transition: background-color 0.3s;
     }
     .btn:hover:not(:disabled) { background-color: #005c9e; }
+    .btn:disabled {
+      background-color: #ccc;
+      color: #666;
+      cursor: not-allowed;
+    }
+    /* Grey Back Button Styling */
     .back-btn {
       background-color: #ccc;
       color: #333;
+      border: none;
       padding: 10px 20px;
       font-size: 16px;
-      border: none;
       border-radius: 4px;
       cursor: pointer;
       transition: background-color 0.3s;
     }
     .back-btn:hover { background-color: #bbb; }
-    /* Footer */
+    /* Button Row Container */
+    .button-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    /* Footer (Powered by) */
     .powered-by {
       text-align: center;
       font-size: 12px;
@@ -220,7 +248,6 @@
     @media (max-width: 768px) {
       .dashboard-container { flex-direction: column; }
       .sidebar { width: 100%; text-align: center; }
-      .buy-from-flow .container, .sell-flow .container { max-width: 90%; }
     }
   </style>
 </head>
@@ -268,6 +295,7 @@
       <!-- My Tickets Tab -->
       <div id="tab-my-tickets" class="tab-content">
         <h1>My Tickets</h1>
+        <!-- Ticket Card 1 -->
         <div class="ticket-card">
           <img src="https://picsum.photos/seed/ticket1/200/150" alt="Rock Concert 2025">
           <div class="ticket-details">
@@ -280,6 +308,7 @@
             <p class="ticket-prompt">click to view ticket</p>
           </div>
         </div>
+        <!-- Ticket Card 2 -->
         <div class="ticket-card">
           <img src="https://picsum.photos/seed/ticket2/200/150" alt="Jazz Night">
           <div class="ticket-details">
@@ -292,6 +321,7 @@
             <p class="ticket-prompt">click to view ticket</p>
           </div>
         </div>
+        <!-- Ticket Card 3 -->
         <div class="ticket-card">
           <img src="https://picsum.photos/seed/ticket3/200/150" alt="Comedy Show">
           <div class="ticket-details">
@@ -307,7 +337,7 @@
       </div>
       <!-- Buy From Tab (Buyer Flow) -->
       <div id="tab-buy-from" class="tab-content">
-        <h1>Buy Tickets</h1>
+        <h1 class="tab-buy-header">Buy Tickets</h1>
         <div id="buyerFlow" class="buy-from-flow">
           <!-- Buyer Flow: Page 1 – Terms and Conditions -->
           <div id="buy-termsPage" class="page active">
@@ -335,7 +365,7 @@
                 <input type="text" class="buy-code" maxlength="1">
                 <input type="text" class="buy-code" maxlength="1">
               </div>
-              <div style="display:flex; justify-content: space-between;">
+              <div class="button-row">
                 <button class="btn back-btn" id="buyerBackBtn">Back</button>
                 <button class="btn" id="buyerConfirmBtn">Buy</button>
               </div>
@@ -347,7 +377,7 @@
               <h2>Summary</h2>
               <p id="buyerSummaryTicketDetail" class="prominentDetail"></p>
               <div id="buyerPriceSummary" class="price-summary-box"></div>
-              <div style="display:flex; justify-content: space-between;">
+              <div class="button-row">
                 <button class="btn back-btn" id="buyerSummaryBackBtn">Back</button>
                 <button class="btn" id="buyerProceedToPaymentBtn">Proceed to Payment</button>
               </div>
@@ -374,7 +404,7 @@
                   <label for="buyerCVV">CVV</label><br>
                   <input type="text" id="buyerCVV" name="buyerCVV" placeholder="123" maxlength="3" style="width:100%; padding:8px;">
                 </div>
-                <div style="display:flex; justify-content: space-between;">
+                <div class="button-row">
                   <button class="btn back-btn" type="button" id="buyerPaymentBackBtn">Back</button>
                   <button class="btn" type="submit" id="buyerPayBtn">Pay</button>
                 </div>
@@ -395,7 +425,7 @@
       </div>
       <!-- Sell To Tab (Seller Flow) -->
       <div id="tab-sell-to" class="tab-content">
-        <h1>Sell Tickets</h1>
+        <h1 class="tab-buy-header">Sell Tickets</h1>
         <div id="sellerFlow" class="sell-flow">
           <!-- Seller Flow: Page 1 – Terms and Conditions -->
           <div id="sell-termsPage" class="page active">
@@ -445,7 +475,7 @@
                 <option value="Classical Evenings | 2025-09-05">Classical Evenings | 2025-09-05</option>
               </select>
               <div id="sellerTicketDetails" class="prominentDetail"></div>
-              <div style="display:flex; justify-content: space-between; margin-top:20px;">
+              <div class="button-row">
                 <button class="btn back-btn" id="sellerSelectTicketBackBtn">Back</button>
                 <button class="btn" id="sellerProceedBtn">Proceed</button>
               </div>
@@ -457,7 +487,7 @@
               <h2>Summary</h2>
               <p id="sellerPersonSummaryTicketDetail" class="prominentDetail"></p>
               <div id="sellerPriceSummary" class="price-summary-box"></div>
-              <div style="display:flex; justify-content: space-between;">
+              <div class="button-row">
                 <button class="btn back-btn" id="sellerPersonSummaryBackBtn">Back</button>
                 <button class="btn" id="sellerProceedToGenCodeBtn">Proceed to Generate Code</button>
               </div>
@@ -485,7 +515,7 @@
               </div>
               <p id="sellerTimer">Time left: 05:00</p>
               <button class="btn" id="sellerGenerateCodeBtn" disabled>Generate Code</button>
-              <div style="display:flex; justify-content: space-between; margin-top:20px;">
+              <div class="button-row">
                 <button class="btn back-btn" id="sellerGenCodeBackBtn">Back</button>
                 <button class="btn" id="sellerFinishBtn">Finish</button>
               </div>
@@ -504,7 +534,7 @@
                 <input type="checkbox" id="sellerSummaryTermsCheckbox">
                 <label for="sellerSummaryTermsCheckbox">I understand the terms and conditions</label>
               </div>
-              <div style="display:flex; justify-content: space-between;">
+              <div class="button-row">
                 <button class="btn back-btn" id="sellerSummaryBackBtn">Back</button>
                 <button class="btn" id="sellerConfirmSellBtn" disabled>Confirm Sell To Marketplace</button>
               </div>
@@ -520,13 +550,13 @@
           </div>
         </div>
       </div>
-      <!-- Footer -->
+      <!-- Footer: Powered by Genuitix -->
       <footer class="powered-by">Powered by Genuitix</footer>
     </div>
   </div>
   
+  <!-- Sidebar Tab Switching Script -->
   <script>
-    // Sidebar Tab Switching Script
     const sidebarItems = document.querySelectorAll('.sidebar li');
     const tabContents = document.querySelectorAll('.tab-content');
     sidebarItems.forEach(item => {
@@ -538,36 +568,27 @@
         if(tabToShow) { tabToShow.classList.add('active'); }
       });
     });
+    
+    // On page load, check URL hash to activate the correct tab (e.g., #tab-my-tickets)
     window.addEventListener("load", function() {
       const hash = window.location.hash;
       if (hash) {
         const targetTab = document.querySelector(`.sidebar li[data-tab="${hash.replace('#tab-', '')}"]`);
-        if (targetTab) { targetTab.click(); }
+        if (targetTab) {
+          targetTab.click();
+        }
       }
     });
   </script>
   
-  <script>
-    // Ticket click functionality for My Tickets tab
-    const ticketData = [
-      { eventName: "Rock Concert 2025", eventDate: "21 Jun 2025", eventTime: "8:00 PM", seatSection: "Section A" },
-      { eventName: "Jazz Night", eventDate: "10 Jul 2025", eventTime: "7:30 PM", seatSection: "Section B" },
-      { eventName: "Comedy Show", eventDate: "15 Aug 2025", eventTime: "9:00 PM", seatSection: "Section C" }
-    ];
-    document.querySelectorAll('.ticket-card').forEach((card, index) => {
-      card.addEventListener('click', function() {
-        localStorage.setItem('ticketDetails', JSON.stringify(ticketData[index]));
-        window.location.href = "ticketDetails.html";
-      });
-    });
-  </script>
-  
+  <!-- BUYER & SELLER FLOW Script -->
   <script>
     /* =================== BUYER FLOW =================== */
     let buyerTicketPrice = 0;
     let buyerConcertID = "";
     let buyerGeneratedCodes = {};
     let buyerTimerInterval;
+    
     const buyerTermsCheckbox = document.getElementById('buyerTermsCheckbox');
     const buyerContinueBtn = document.getElementById('buyerContinueBtn');
     buyerTermsCheckbox.addEventListener('change', function() {
@@ -576,6 +597,8 @@
     buyerContinueBtn.addEventListener('click', function() {
       showBuyerFlowPage('buy-homePage');
     });
+    
+    // Auto-focus next input for Seller Code inputs
     document.querySelectorAll('#buyCodeInputs .buy-code').forEach((input, index, arr) => {
       input.addEventListener('input', () => {
         if(input.value.length === input.maxLength && index < arr.length - 1) {
@@ -583,6 +606,7 @@
         }
       });
     });
+    
     const buyInputs = document.querySelectorAll('#buyCodeInputs .buy-code');
     document.getElementById('buyerBackBtn').addEventListener('click', function() {
       showBuyerFlowPage('buy-termsPage');
@@ -594,6 +618,7 @@
         alert("Please enter the complete 6-character code.");
         return;
       }
+      // For demo, assume code is valid and set a demo price
       buyerTicketPrice = 100; 
       let fee = buyerTicketPrice * 0.05;
       let totalCost = buyerTicketPrice + fee;
@@ -602,6 +627,7 @@
       document.getElementById('buyerSummaryTicketDetail').textContent = "Selected Ticket: Demo Ticket";
       showBuyerFlowPage('buyerSummaryPage');
     });
+    
     document.getElementById('buyerSummaryBackBtn').addEventListener('click', function() {
       showBuyerFlowPage('buy-homePage');
     });
@@ -615,11 +641,13 @@
       e.preventDefault();
       showBuyerFlowPage('buyerThankYouPage');
     });
+    // On Buyer Thank You page, clear buyer input fields and uncheck terms checkbox
     document.getElementById('buyerBackToHomeBtn').addEventListener('click', function(){
       document.querySelectorAll('#buyerFlow input').forEach(input => input.value = "");
       document.getElementById('buyerTermsCheckbox').checked = false;
       showBuyerFlowPage('buy-termsPage');
     });
+    
     function showBuyerFlowPage(pageId) {
       document.querySelectorAll('.buy-from-flow .page').forEach(p => p.classList.remove('active'));
       document.getElementById(pageId).classList.add('active');
@@ -632,6 +660,7 @@
     let sellerGeneratedCodes = {};
     let sellerTimerInterval;
     let sellerMethod = "";
+    
     const sellerTermsCheckbox = document.getElementById('sellerTermsCheckbox');
     const sellerContinueBtn = document.getElementById('sellerContinueBtn');
     sellerTermsCheckbox.addEventListener('change', function() {
@@ -643,6 +672,7 @@
     document.getElementById('sellerBackBtn').addEventListener('click', function() {
       showSellerFlowPage('sell-termsPage');
     });
+    
     document.getElementById('sellerPersonBtn').addEventListener('click', function() {
       sellerMethod = "person";
       showSellerFlowPage('sellerSelectTicketPage');
@@ -651,6 +681,7 @@
       sellerMethod = "marketplace";
       showSellerFlowPage('sellerSelectTicketPage');
     });
+    
     const sellerConcertSelect = document.getElementById('sellerConcertSelect');
     const sellerTicketDetailsDiv = document.getElementById('sellerTicketDetails');
     const sellerConcertDetails = {
@@ -678,7 +709,7 @@
       let detail = sellerConcertDetails[sellerConcertID];
       let parts = detail.split(',');
       sellerTicket = sellerConcertID + " - " + parts[0] + ", " + parts[1].trim();
-      let priceMatch = detail.match(/\\$(\\d+(\\.\\d+)?)/);
+      let priceMatch = detail.match(/\$(\d+(\.\d+)?)/);
       if(priceMatch) {
         sellerTicketPrice = parseFloat(priceMatch[1]);
       }
@@ -701,12 +732,14 @@
     document.getElementById('sellerSelectTicketBackBtn').addEventListener('click', function() {
       showSellerFlowPage('sellerHomePage');
     });
+    
     document.getElementById('sellerProceedToGenCodeBtn').addEventListener('click', function() {
       showSellerFlowPage('sellerGenerateCodePage');
     });
     document.getElementById('sellerPersonSummaryBackBtn').addEventListener('click', function() {
       showSellerFlowPage('sellerSelectTicketPage');
     });
+    
     const sellerTermsCheckbox2 = document.getElementById('sellerTermsCheckbox2');
     const sellerGenerateCodeBtn = document.getElementById('sellerGenerateCodeBtn');
     sellerTermsCheckbox2.addEventListener('change', function() {
@@ -723,6 +756,7 @@
     document.getElementById('sellerFinishBtn').addEventListener('click', function() {
       showSellerFlowPage('sellerThankYouPage');
     });
+    
     function sellerGeneratedCodeExists() {
       return (sellerConcertID in sellerGeneratedCodes) && (sellerGeneratedCodes[sellerConcertID].expiresAt > Date.now());
     }
@@ -794,6 +828,7 @@
     document.getElementById('sellerGenerateCodeBtn').addEventListener('click', function(){
       sellerDisplayCode();
     });
+    
     document.getElementById('sellerSummaryTermsCheckbox').addEventListener('change', function() {
       document.getElementById('sellerConfirmSellBtn').disabled = !this.checked;
     });
@@ -807,19 +842,23 @@
       sellerGeneratedCodes = {};
       showSellerFlowPage('sell-termsPage');
     });
+    
     function showSellerFlowPage(pageId) {
       document.querySelectorAll('.sell-flow .page').forEach(p => p.classList.remove('active'));
       document.getElementById(pageId).classList.add('active');
     }
+    
     /* =================== VIEW TICKET HANDLERS =================== */
-    const ticketDataArr = [
+    const ticketData = [
       { eventName: "Rock Concert 2025", eventDate: "21 Jun 2025", eventTime: "8:00 PM", seatSection: "Section A" },
       { eventName: "Jazz Night", eventDate: "10 Jul 2025", eventTime: "7:30 PM", seatSection: "Section B" },
       { eventName: "Comedy Show", eventDate: "15 Aug 2025", eventTime: "9:00 PM", seatSection: "Section C" }
     ];
+    
+    // Attach click handler to each ticket card so that clicking the card sends the user to the ticket details page
     document.querySelectorAll('.ticket-card').forEach((card, index) => {
       card.addEventListener('click', function() {
-        localStorage.setItem('ticketDetails', JSON.stringify(ticketDataArr[index]));
+        localStorage.setItem('ticketDetails', JSON.stringify(ticketData[index]));
         window.location.href = "ticketDetails.html";
       });
     });
