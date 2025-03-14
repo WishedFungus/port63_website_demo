@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <!-- Mobile viewport -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ticketmaster SG - View Ticket</title>
   <style>
@@ -18,10 +17,10 @@
       min-height: 100vh;
       padding: 20px;
     }
+    /* Card common style */
     .card {
       background-color: #fff;
-      width: 90%;
-      max-width: 400px;
+      width: 400px;
       border-radius: 6px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
       overflow: hidden;
@@ -52,8 +51,11 @@
       overflow: hidden;
     }
     #video, #overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
-      height: auto;
+      height: 100%;
       object-fit: cover;
       transform: scaleX(-1);
     }
@@ -132,16 +134,8 @@
       font-size: 14px;
       margin-top: 20px;
       transition: background-color 0.3s;
-      width: 100%;
     }
     .back-btn:hover { background-color: #ccc; }
-    /* Mobile adjustments */
-    @media (max-width: 600px) {
-      .card-header { font-size: 20px; }
-      #prompt, .timer, .ticket-details { font-size: 16px; }
-      #verifyButton { font-size: 14px; padding: 10px; }
-      .back-btn { font-size: 14px; padding: 8px; }
-    }
   </style>
 </head>
 <body>
@@ -159,6 +153,7 @@
       </div>
       <div id="prompt">No face detected</div>
       <button id="verifyButton" type="button" disabled onclick="verifyIdentity()">Verify Identity</button>
+      <!-- Updated Back button -->
       <a href="dashboard.html#tab-my-tickets" class="back-to-dashboard">Back to My Tickets</a>
     </div>
   </div>
