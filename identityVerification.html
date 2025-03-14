@@ -2,11 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <!-- Mobile friendly viewport -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Ticketmaster SG - Identity Verification</title>
-  <!-- Load face-api.js for fallback detection -->
-  <script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -21,8 +18,7 @@
     }
     .verification-card {
       background-color: #fff;
-      width: 90%;
-      max-width: 400px;
+      width: 400px;
       border-radius: 6px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
       overflow: hidden;
@@ -50,10 +46,14 @@
       border-radius: 6px;
       overflow: hidden;
     }
-    /* Ensure video and canvas scale responsively */
-    #video, #overlay {
+    /* Mirror live view */
+    #video,
+    #overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
-      height: auto;
+      height: 100%;
       object-fit: cover;
       transform: scaleX(-1);
     }
@@ -112,13 +112,6 @@
       text-decoration: none;
     }
     .back-to-verification:hover { text-decoration: underline; }
-    /* Mobile adjustments */
-    @media (max-width: 600px) {
-      .card-header { font-size: 20px; }
-      .card-body h1 { font-size: 20px; }
-      #prompt { font-size: 16px; }
-      #verifyButton { font-size: 14px; padding: 10px; }
-    }
   </style>
 </head>
 <body>
@@ -142,19 +135,58 @@
       <a href="verification.html" class="back-to-verification">Back to Verification</a>
     </div>
   </div>
-  
   <script>
+    let verified = false;
     const video = document.getElementById('video');
     const canvas = document.getElementById('overlay');
+    const container = document.getElementById('camera-container');
     const promptEl = document.getElementById('prompt');
-    const verifyButton = document.getElementById('verifyButton');
     const ctx = canvas.getContext('2d');
     const tolerance = 50;
+    const verifyButton = document.getElementById('verifyButton');
+    let faceDetector;
+    let stream = null;
     
-    // --- Native FaceDetector Approach ---
-    function detectFacesNative() {
-      const detector = new FaceDetector({ fastMode: true, maxDetectedFaces: 1 });
-      detector.detect(video)
+    if ('FaceDetector' in window) {
+      faceDetector = new FaceDetector({ fastMode: true, maxDetectedFaces: 1 });
+    } else {
+      promptEl.innerText = "Face detection not supported.";
+    }
+    
+    function startCamera() {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true })
+          .then(str => {
+            stream = str;
+            video.srcObject = stream;
+            video.play();
+          })
+          .catch(err => {
+            console.error("Camera error:", err);
+            promptEl.innerText = "Unable to access camera.";
+          });
+      } else {
+        promptEl.innerText = "Camera not supported.";
+      }
+      video.addEventListener('playing', () => {
+        const vw = video.videoWidth || 640;
+        const vh = video.videoHeight || 480;
+        canvas.width = vw;
+        canvas.height = vh;
+      });
+    }
+    
+    function stopCamera() {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        video.srcObject = null;
+        stream = null;
+      }
+    }
+    
+    function detectFaces() {
+      if (!faceDetector) return;
+      faceDetector.detect(video)
         .then(faces => {
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           if (faces.length > 0) {
@@ -173,9 +205,13 @@
             const areaRatio = faceArea / canvasArea;
             let instruction = "";
             if (Math.abs(dx) < tolerance && Math.abs(dy) < tolerance) {
-              if (areaRatio < 0.25) instruction = "Face centered but too small – move closer.";
-              else if (areaRatio > 0.35) instruction = "Face centered but too big – move further.";
-              else instruction = "Face centered!";
+              if (areaRatio < 0.25) {
+                instruction = "Face centered but too small – move closer.";
+              } else if (areaRatio > 0.35) {
+                instruction = "Face centered but too big – move further.";
+              } else {
+                instruction = "Face centered!";
+              }
             } else {
               if (dx > tolerance) instruction += "Move right. ";
               if (dx < -tolerance) instruction += "Move left. ";
@@ -183,18 +219,48 @@
               if (dy < -tolerance) instruction += "Move up. ";
             }
             promptEl.innerText = instruction;
-            verifyButton.disabled = !(Math.abs(dx) < tolerance && Math.abs(dy) < tolerance &&
-                                        areaRatio >= 0.25 && areaRatio <= 0.35);
+            if (Math.abs(dx) < tolerance && Math.abs(dy) < tolerance &&
+                areaRatio >= 0.25 && areaRatio <= 0.35) {
+              verifyButton.disabled = false;
+            } else {
+              verifyButton.disabled = true;
+            }
           } else {
             promptEl.innerText = "No face detected";
             verifyButton.disabled = true;
           }
         })
         .catch(err => {
-          console.error("Native face detection error:", err);
+          console.error("Face detection error:", err);
           promptEl.innerText = "Error detecting face";
           verifyButton.disabled = true;
         })
         .finally(() => {
-          requestAnimationFrame(detectFacesNative);
-  
+          requestAnimationFrame(detectFaces);
+        });
+    }
+    
+    function verifyIdentity() {
+      const originalColor = document.body.style.backgroundColor || '#888';
+      const flashInterval = setInterval(() => {
+        document.body.style.backgroundColor =
+          '#' + Math.floor(Math.random() * 16777215).toString(16);
+      }, 300);
+      setTimeout(() => {
+        clearInterval(flashInterval);
+        document.body.style.backgroundColor = originalColor;
+        document.getElementById('verificationResult').style.display = 'block';
+        verified = true;
+      }, 2000);
+    }
+    
+    function goToConfirmation() {
+      stopCamera();
+      window.location.href = "confirmation.html";
+    }
+    
+    startCamera();
+    requestAnimationFrame(detectFaces);
+  </script>
+</body>
+</html>
